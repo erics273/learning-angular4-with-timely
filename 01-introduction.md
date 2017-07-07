@@ -72,7 +72,7 @@ This unit refers to and uses the following software.
 Please install it before continuing.
 
 * [ng-cli](https://cli.angular.io/) - The Angular
-  command line interface, used to gerenate stuff so you
+  command line interface, used to generate stuff so you
   don't have to do it yourself.
 * [Visual Studio Code](https://code.visualstudio.com/)
   \- Arguably, the best text editor to use when creating

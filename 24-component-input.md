@@ -310,7 +310,7 @@ Sure enough, that looks the same that it did before,
 which is what you wanted.
 
 ![timely - report
-page](https://tiy-corp-train.github.io/newline-media/learning-angularjs-with-timely/empty-report-page.png)
+page](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/empty-report-page.png)
 
 Then, you change the HTML to try out the paw print,
 just on a lark, to see what that looks like.
@@ -327,7 +327,7 @@ just on a lark, to see what that looks like.
 ```
 
 ![timely - report
-page](https://tiy-corp-train.github.io/newline-media/learning-angularjs-with-timely/empty-report-page-with-paw-print.png)
+page](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/empty-report-page-with-paw-print.png)
 
 That worked. But, you feel that weird binding language
 is pretty stupid, using @, <, and = rather than

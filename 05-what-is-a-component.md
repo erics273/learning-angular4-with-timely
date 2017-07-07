@@ -1,11 +1,14 @@
-# What Does AngularJS Mean by "Component"?
+# What Does Angular Mean by "Component"?
 
 The answer to that is fairly simple:
 
 [callout-info]
-An AngularJS component is comprised of some HTML and
-JavaScript bundled together and treated like a custom
-HTML tag.
+Components are the most basic building block of an UI
+in an Angular application. An Angular application is a
+tree of Angular components. Angular components are a
+subset of directives. Unlike directives, components
+always have a template and only one component can be
+instantiated per an element in a template.
 [/callout-info]
 
 In practice, what that means is, instead of writing
@@ -22,9 +25,9 @@ want to use it
 </div>
 ```
 
-in addition to some JavaScript in some file like
-`site.js` where, somewhere in there, you might be able
-to find
+in addition to some JavaScript using jQuery in some
+file like `site.js` where, somewhere in there, you
+might be able to find
 
 ```javascript
 // DO NOT DELETE! THIS HANDLES RATINGS!
@@ -49,10 +52,10 @@ star-based ratings, figuring out where to go to fix
 a bug and making sure that it gets fixed in all the
 places can be really, really hard.
 
-So, AngularJS (and frameworks like AngularJS) say to
-you, "Hey, you want a little widget that represents a
+So, Angular (and frameworks like Angular) say to you,
+"Hey, you want a little widget that represents a
 five-star rating feature? Let me help you with that!"
-In AngularJS, you just declare a component that would
+In Angular, you just declare a component that would
 show the same HTML and some JavaScript in the
 component file, and you get to then write this HTML.
 
@@ -60,15 +63,18 @@ component file, and you get to then write this HTML.
 <star-rating></star-rating>
 ```
 
+everywhere you want to see five stars instead of the
+monster HTML block you wrote before.
+
 ## Once Again
 
-A component is a bundle of HTML and JavaScript that
-AngularJS will put into a Web page for you and manage
-as if they're all one thing. This means that you can
-have things that look like your own HTML tags in your
-Web page that could make your Web page source look
-like this, though I can't imagine what you'd try to
-accomplish with such a thing.
+A component is a bundle of HTML, CSS and JavaScript
+that Angular will put into a Web page for you and
+manage as if they're all one thing. This means that
+you can have things that look like your own HTML tags
+in your Web page that could make your Web page source
+look like this, though I can't imagine what you'd try
+to accomplish with such a thing.
 
 ```html
 <body>
@@ -78,8 +84,8 @@ accomplish with such a thing.
 </body>
 ```
 
-Although, now that I see that, it could be a Web
-application that describes my college dorm room.
+(Although, now that I see that, it could be a Web
+application that describes my college dorm room.)
 
-Now, let's make one so we can see this idea in
-practice.
+Now, you should go and make a simple component that
+takes you one step closer to making Timely!

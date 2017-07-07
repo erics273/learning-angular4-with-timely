@@ -24,7 +24,7 @@ start figuring out the application.
 You remind yourself that all of the
 server-side stuff is done. You just have to deal with
 the stuff in the browser: the HTML and JavaScript and
-CSS. Michaela has alread written the API for you to
+CSS. Michaela has already written the API for you to
 use. (Thanks, Michaela!) So, you take a deep breath
 and...
 
@@ -33,7 +33,7 @@ and...
 Well, you haven't logged in, yet, so you get sent to
 the login screen. It seems Michaela may have had some
 idea of turning this into a product at some point what
-with that "Not a user?" box. Hmmm...
+with that "Not a user?" box. Hmm...
 
 ![timely - login
 screen](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/login-screen.png)
@@ -92,7 +92,7 @@ type "Marigold Cabs" into the client's name box and hit
 the Enter key. Sure enough, "Marigold" shows up in your
 list.
 
-![timely - clients list iwth marigold cabs in
+![timely - clients list with marigold cabs in
 it](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/clients-list-with-marigold.png)
 
 You go back to the "TODAY'S WORK" tab and check out the
@@ -147,7 +147,31 @@ screen](https://tiy-corp-train.github.io/newline-media/learning-angular-with-tim
 
 That makes total sense.
 
-## Reflections
+## Reflections on How to Develop
+
+You know from reading that developing an application
+with Angular is easiest if you use its development
+server which normally runs on port 4200. You know that
+Timely runs on port 5000. That means that, when you
+develop this Angular SPA, you're going to have to
+things running at the same time, the Angular
+development server and the Spring app. To clear things
+up in your mind, you draw a little picture to make
+sure you understand how it will all work together.
+
+![timely - Angular workflow](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/interaction-sketch.jpeg)
+
+You will start both the Angular and Spring apps. Then,
+you will point your browser to `localhost:4200` to
+load the UI of your SPA. Then, when your UI wants
+data, it will make calls to `localhost:5000`, to the
+Java Spring server, which will get information out of
+the database and return it to you as JSON.
+
+With that straightened out in your head, you figure
+out your first step.
+
+## Your Game Plan
 
 Well, now that you've seen the application, you decide
 to start small and take baby steps on getting the
