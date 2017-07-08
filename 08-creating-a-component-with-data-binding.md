@@ -5,72 +5,68 @@ there are two types of binding in JavaScript
 frameworks: data binding and action binding.
 
 **Data binding** occurs when a UI framework like
-AngularJS automatically associates the value of a
+Angular automatically associates the value of a
 JavaScript variable with what's in a form field.
 
 **Action binding** occurs when a UI framework ties
 together an action, like a person clicking a button,
 with a JavaScript method.
 
+**Data rendering** occurs when a value in a variable
+of the component changes and Angular updates the view
+with the value.
+
 You recognize that there are four things that you
 want to bind in the `login-card` component.
 
 1. You want to bind the value of the `username` input
-   field to a JavaScript variable;
+   field to a variable in the `LoginCardComponent`
+   class;
 1. You want to bind the value of the `password` input
-   field to a JavaScript variable;
+   field to a variable in the `LoginCardComponent`
+   class;
 1. You want to use those values to bind to the
    `disabled` attribute of the "WATCH TIME" button so
    that it's enabled when both fields have something
    typed in them; and,
-1. You want to call a JavaScript method when the
-   person submits the login form.
+1. You want to call a method in the
+   `LoginCardComponent` when a person clicks the
+   "WATCH TIME" button.
 
-## Readying the Component for Data Binding
+## Reviewing the Component for Data Binding
 
-Right now, the `login-card.component.js` file looks
+Right now, the `login-card.component.ts` file looks
 like this:
 
-```javascript
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html'
-  });
+```typescript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-login-card',
+  templateUrl: './login-card.component.html',
+  styleUrls: ['./login-card.component.css']
+})
+export class LoginCardComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
 ```
 
-Whenever you introduce interactive behavior to a
-component, you want to introduce the idea of a
-**controller** for the component.
+The `LoginCardComponent` class is the controller for
+the component. That means all of the data from the
+view and the actions that people will take should be
+handled in the `LoginCardComponent` class.
 
 [callout-info]
-A **controller** in a component is what controls and
-directs the data binding and behavior of that
-component.
+In the Model-View-Controller pattern, the controller
+acts as the glue between the data in the model (which
+you don't have, yet) and the view (which you just
+created in the `login-card.component.html` file).
 [/callout-info]
-
-AngularJS best practices informs you that you should
-give that controller a name (or an alias, if you
-prefer) that you will use in the HTML template when
-refering to variables and methods. You do that using
-the `controllerAs` property of the configuration
-object.
-
-Because this is the `login-card` component, you decide
-to alias the controller for the HTML templates with
-the name `login`.
-
-```javascript
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-
-    // Provide an alias for the component for use in
-    // the component's HTML file.
-    controllerAs: 'login'
-  });
-```
 
 ## Data Binding the Input Fields
 
@@ -78,75 +74,152 @@ Right now, the `login-card.component.html` file looks
 like this:
 
 ```html
-<form method="post" action="/session/mine">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <div>{{ error }}</div>
-    <input autofocus type="text" placeholder="username" name="username">
-    <input type="password" placeholder="password" name="password">
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+  <div class="form-line">
+    <input type="text" placeholder="username">
   </div>
-  <div class="card-actions">
-    <button class="button-primary">Watch time</button>
+  <div class="form-line">
+    <input type="password" placeholder="password">
   </div>
-</form>
+</div>
+<div class="actions">
+  <button class="cta">Watch time</button>
+</div>
 ```
 
 To bind an `input`'s value to a variable of the
-controller of the component, you use the `ng-model`
+controller of the component, you use the `ngModel`
 attribute. In the case of your form, you look at the
-`username`  `input` field.
+`username` `input` field.
 
 ```html
 <!-- Plain old HTML -->
-<input autofocus type="text" placeholder="username" name="username">
+<input type="text" placeholder="username">
 ```
 
-You change that to use the `ng-model` attribute with
-the name of the controller that you specified in the
-last section, `login`. You decide that you want to
-bind it to the `username` property on the `login`
-controller. This changes the `<input>` field to look
-like this.
+You change that to use the `ngModel` attribute with
+the name of the property that you want to set. You
+decide that you want to bind it to the `username`
+property of the `LoginCardComponent` class. This
+changes the `<input>` field to look like this.
 
 ```html
-<!-- Now, with AngularJS data binding because of "ng-model"! -->
-<input autofocus type="text" placeholder="username" ng-model="login.username">
+<!-- Now, with Angular data binding because of "ngModel"! -->
+<input type="text" placeholder="username" [(ngModel)]="username">
 ```
 
-You do the same with the `password` field so that your
+When you save the file, your brow furrows because you
+now see an error in the developer tools that reads:
+
+> Can't bind to 'ngModel' since it isn't a known
+> property of 'input'
+
+A little [duckduckgo](http://duckduckgo.com) magic
+leads you to [a
+solution](http://jsconfig.com/solution-cant-bind-ngmodel-since-isnt-known-property-input/)
+to the problem, but not the *reason*. You do some more
+searching and cobble together why your application
+broke by trying to use the `ngModel` attribute. You
+take a small detour from data binding to set up the
+application to use `ngModel` on `<input>`s.
+
+### Backing Up: Readying the Application for Data Binding
+
+In your reading, you find that when the Angular team
+took on the challenge to create the next version of
+Angular, to evolve it from 1.X to 2.X, they decided to
+modularize the different portions of functionality so
+you only import the stuff that you need to use.
+
+You open the `app.module.ts` and see that the only
+functionality-enhancing Angular module that your
+application uses, right now, is the `BrowserModule`.
+You want to start using form elements which means that
+you are going to need the `FormsModule`'s
+functionality added to the application. You modify the
+`app.module.ts`.
+
+```typescript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+// Import the FormsModule so you can use form-based
+// data binding
+import { FormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+import { RegistrationCtaComponent } from './registration-cta/registration-cta.component';
+import { LoginCardComponent } from './login-card/login-card.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    RegistrationCtaComponent,
+    LoginCardComponent
+  ],
+  imports: [
+    BrowserModule,
+
+    // Add the functionality of the external Angular
+    // forms module to your application module.
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+When you make this change and save the file, the error
+goes away. You smile and get back to data binding the
+`<input>`s.
+
+### Back to Data Binding the Input Fields
+
+Now, you bind the `password` field so that your
 component's HTML now looks like this:
 
 ```html
-<form method="post" action="/session/mine">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <div>{{ error }}</div>
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+  <div class="form-line">
 
     <!-- Look at this lovely data binding! -->
-    <input autofocus type="text" placeholder="username" ng-model="login.username">
-    <input type="password" placeholder="password" ng-model="login.password">
+    <input type="text" placeholder="username" [(ngModel)]="username">
 
   </div>
-  <div class="card-actions">
-    <button class="button-primary">Watch time</button>
+  <div class="form-line">
+
+    <!-- Look at this lovely data binding! -->
+    <input type="password" placeholder="password" [(ngModel)]="password">
+
   </div>
-</form>
+</div>
+<div class="actions">
+  <button class="cta">Watch time</button>
+</div>
 ```
 
 [callout-info]
-You just used AngularJS to watch those `<input>`
+You just used Angular to monitor those `<input>`
 fields. Now, whenever someone types something into
 them, it will automagically get stored in the
 `username` and `password` properties of the
-component's controller!
+`LoginCardComponent` instance!
 [/callout-info]
 
-## Data Binding the Button
+For right now, you just accept the "`[()]`" that wraps
+the `ngModel`. You saw that's how it was supposed to
+be done and, after you get this component bound, you
+will spend the time understanding that weird
+punctuation.
 
-AngularJS also provides a binding mechanism named
-`ng-disabled` which will add the `disabled` attribute
-to an element if the JavaScript expression that it's
-set to is `true`.
+## Data Binding the Button's Disabled State
+
+A little bit of research show that you can control
+the value of the `disabled` property of the `<button>`
+using Angular.
 
 In your case, you figure that you want the button
 disabled if the `login.username` or `login.password`
@@ -160,216 +233,225 @@ Formally, you want to
 > In JavaScript logic:
 > login.username.length === 0 || login.password.length === 0
 
-You use that logic in the `ng-disabled` attribute and
-get
+Because this is logic based on values in the
+component, you decide that putting the logic for this
+in the `LoginCardComponent` class. In
+`login-card.component.ts`, you add a getter value
+named `disableButton` and the `private` fields that
+will allow you to access those properties from the
+HTML.
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-login-card',
+  templateUrl: './login-card.component.html',
+  styleUrls: ['./login-card.component.css']
+})
+export class LoginCardComponent implements OnInit {
+
+  // The TypeScript compiler requires that you have
+  // these. You set them to default values of empty
+  // strings.
+  private username = '';
+  private password = '';
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  // A getter that allows that you will bind to the
+  // button to make sure that it's disabled properly.
+  get disableButton() {
+    return this.username.length === 0 ||
+           this.password.length === 0;
+  }
+
+}
+```
+
+Now, you use this new getter in the view, in
+`login-card.component.html`.
 
 ```html
-<form method="post" action="/session/mine">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <div>{{ error }}</div>
-    <input autofocus type="text" placeholder="username" ng-model="login.username">
-    <input type="password" placeholder="password" ng-model="login.password">
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+  <div class="form-line">
+    <input type="text" placeholder="username" [(ngModel)]="username">
   </div>
-  <div class="card-actions">
-
-    <!-- Look at that fancy disabling! -->
-    <button class="button-primary" ng-disabled="login.username.length === 0 || login.password.length === 0">Watch time</button>
-
+  <div class="form-line">
+    <input type="password" placeholder="password" [(ngModel)]="password">
   </div>
-</form>
+</div>
+<div class="actions">
+
+  <!-- When disableButton is true, it disables the button! -->
+  <button class="cta" [disabled]="disableButton">Watch time</button>
+
+</div>
 ```
 
 You smile after the page refreshes because, now, the
 "WATCH TIME" button is disabled until you type some
 values into both the username and password fields!
 
-## Binding the Form Submission
+Now, you see that the `disabled` property is
+surrounded by some "`[]`". You feel slightly
+uncomfortable because you're using things you don't
+fully understand, yet. You just know they work. Now,
+you've used "`[(...)]` and `[]` when binding in a
+component template. You promise yourself that, after
+the component can do something when you click the
+button, you'll figure out what this punctuation means.
 
-Finally, you want to capture the submission of the
-`<form>` to the server. You do this by using the
-`ng-submit` attribute that AngularJS provides. The
-value of that attribute should be the name of the
-method that you want to call on the controller. So,
-you add that little snippet of code to the `<form>`
-tag while deleting the `method` and `action`
-attributes because you don't want to submit the form,
-anymore, using the normal browser stuff. The method
-that this will call will make an AJAX call. The
-response of the AJAX call will determine if the user
-get's logged in.
+## Binding the Button Click
 
-Again, those steps you take are:
+When someone clicks that button, you want the
+component to submit the credentials that the person
+has provided. You just want to wire up that event
+handler in such a way that you are assured that
+everything works in the way that you expect. Then, you
+can get on with the business of actually logging in
+the person who supplied the credentials. You realize
+that you need a method to call for the button click.
+You put that on the `LoginCardComponent` class.
 
-1. Add the `ng-submit` attribute to the `<form>` tag;
-1. Remove the `action` attribute from the `<form>`
-   tag; and,
-1. Remove the `method` attribute from the `<form>`
-   tag.
+```typescript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-login-card',
+  templateUrl: './login-card.component.html',
+  styleUrls: ['./login-card.component.css']
+})
+export class LoginCardComponent implements OnInit {
+
+  private username = '';
+  private password = '';
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  get disableButton() {
+    return this.username.length === 0 ||
+           this.password.length === 0;
+  }
+
+  // Here's a method that the button can use when a
+  // person clicks the button.
+  submitCredentials() {
+    console.log('username:', this.username);
+    console.log('password:', this.password);
+
+    this.username = '';
+    this.password = '';
+  }
+
+}
+```
+
+Right now, your method just prints out the values that
+the person supplied and sets the values of the
+variables to empty strings which clear the two
+`<input>` fields. To get the `<button>` to call the
+method, you bind the Angular `click` event handler.
 
 ```html
-<!-- Using ng-submit to call a method on the controller -->
-<form ng-submit="login.submitForm()">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <div>{{ error }}</div>
-    <input autofocus type="text" placeholder="username" ng-model="login.username">
-    <input type="password" placeholder="password" ng-model="login.password">
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+  <div class="form-line">
+    <input type="text" placeholder="username" [(ngModel)]="username">
   </div>
-  <div class="card-actions">
-    <button class="button-primary" ng-disabled="login.username.length === 0 || login.password.length === 0">Watch time</button>
+  <div class="form-line">
+    <input type="password" placeholder="password" [(ngModel)]="password">
   </div>
-</form>
+</div>
+<div class="actions">
+
+  <!-- Now, the button will be disabled based on
+       the username and password values, and will call
+       the submitCredentials() method when the button
+       is active and a person clicks it. -->
+  <button class="cta"
+          [disabled]="disableButton"
+          (click)="submitCredentials()">Watch time</button>
+</div>
 ```
 
-Now, you just need to add a controller.
-
-## Define a Controller and `submitForm` method
-
-Now that you've completed the modifications to the
-HTML to get it all bound, it's time for you to tie
-that to the JavaScript stuff.
-
-Back in the `login-card.component.js` file, you need
-a new object that will be the controller for the
-component. You define a `class` at the top of the file
-to act as the controller and give it a meaningful
-name.
-
-```javascript
-// Define the controller class
-class LoginCardController {
-}
-
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login'
-  });
-```
-
-Now that you have a controller class, you need to
-include it in the registration of the component
-beneath it. You do that by adding a `controller`
-property to the configuration object of the component.
-Then, you set that property to an array that contains
-a function that creates a new instance of the
-`LoginCardController` class. That should looks like
-this:
-
-```javascript
-class LoginCardController {
-}
-
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-
-    // Register the controller of the component
-    controller: [() => new LoginCardController()]
-  });
-```
-
-You kind of shake your head at that weird syntax and
-remember that you're going to use that really soon to
-be able to make AJAX calls.
-
-Next, you need a method to handle when a person tries
-to submit the form. In the HTML template, you set the
-form tag with `ng-submit="login.submitForm()"` so you
-need a `submitForm` method on the controller. For now,
-you just want to make sure it works, so you have it
-create a console message to show you the values of
-`username` and `password` and, then, clear out the
-values in the `<input>` fields.
-
-```javascript
-class LoginCardController {
-
-  // Fancy new method to handle form submission!
-  submitForm() {
-
-    // Print the values bound from the <input> fields
-    // to the properties on this controller
-    console.log('username:', this.username);
-    console.log('password:', this.password);
-
-    // Set the values of the properties on this
-    // controller which, because they're bound to the
-    // <input> fields, will change the value of the
-    // <input> fields and clear them out!
-    this.username = '';
-    this.password = '';
-  }
-
-}
-
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-    controller: [() => new LoginCardController()]
-  });
-```
-
-Finally, you want to make sure that the `username` and
-`password` properties have empty strings as their
-initial values. You create a constructor for your
-controller and set those values appropriately.
-
-```javascript
-class LoginCardController {
-
-  // A constructor to set the initial values of
-  // username and password
-  constructor() {
-    this.username = '';
-    this.password = '';
-  }
-
-  submitForm() {
-    console.log('username:', this.username);
-    console.log('password:', this.password);
-    this.username = '';
-    this.password = '';
-  }
-}
-
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-    controller: [() => new LoginCardController()]
-  });
-```
-
-Your smile becomes even larger after you refresh the
-page. You type in some text into the username and
+Your smile becomes even larger after the page
+refreshes. You type in some text into the username and
 password fields of the form, click the "WATCH TIME"
 button or hit Enter, and the console messages appear
 with the values of the `username` and `password`
 properties that the `<input>` fields are bound to!
 
+But, now, your smile fades because it's time to figure
+out the "`[()]`", "`[]`", and "`()`" that you've used
+to get this component working.
+
+## Angular Binding Punctuation
+
+You make some notes while reading the [*Binding
+Syntax: An
+Overview*](https://angular.io/guide/template-syntax#binding-syntax-an-overview)
+section of the *Template Syntax* entry of the Angular
+documentation and run across a table that explains the
+different punctuation that you copy into your notes
+for quick reference.
+
+| Punctuation               | Binding Type           | Explanation                                                                                                                                         |
+|---------------------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `[prop]="expression"`     | One-way data binding   | Take the JavaScript *expression*, evaluate it in context of the instance of the component class, and set the value of the `prop`erty to that value. |
+| `(event)="expression"`    | One-way action binding | When *event* occurs, evaluate the *expression* in context of the instance of the component class.                                                   |
+| `[(target)]="expression"` | Two-way data binding   | Make sure that the values of `target` and the *expression* remain in sync.                                                                          |
+| `{{ expression }}`        | One-way data rendering | Put the value of *expression* into the template.                                                                                                    |
+
+You've seen the first three and kind of understand
+what's happening with those.
+
+For the first entry, the one-way data binding, you
+used `[disabled]="disableButton"` which sets the
+boolean property `disabled` to whatever the value of
+`disableButton` is with respect to the instance of the
+component class.
+
+For the second entry, the one-way action binding, you
+used `(click)="submitCredentials()"` to respond to
+**click** events of the button and call the
+`submitCredentials()` method on the instance of the
+component class.
+
+For the third entry, the two-way data binding, you
+used `[(ngModel)]="password"` to synchronize the value
+of the `password` attribute with the value of the
+`<input>` field. When the value changes in the
+`<input>`, the two-way binding sets the value in the
+instance of the component class. When the value of the
+bound field changes in the component class, like when
+a person clicks the button, the two-way binding
+updates the value in the `<input>`.
+
+You haven't used that last kind of binding, yet, the
+one-way data rendering syntax `{{ expression }}`. But,
+you know that you'll soon be showing data in the view
+and you'll have plenty of opportunity to try that out.
+
 ## What Did You Do?
 
 You rub your eyes a little bit because this was a lot
-of work and a lot of new stuff. Breaking it down,
+of work and a lot of new stuff. Breaking it down, you
+learned about binding in many different ways.
 
-You used `ng-model` to *bind controller properties to
-form fields*.
+You used `[(ngModel)]` to *bind controller properties
+to form fields*.
 
-You used `ng-disabled` to *control the disabled state
-of a button*.
+You used `[disabled]="disableButton` to *control the
+disabled state of a button*. You can use this to
+control many of the properties on HTML elements.
 
-You used `ng-submit` to *bind a form submission to a
-controller method*.
-
-You used the `controller` property to *register a
-method that creates a controller object*, in this
-case, a new instance of the `LoginCardController`
-class.
+You used `(click)="submitCredentials()"` to *bind a
+button click to a component method*.
