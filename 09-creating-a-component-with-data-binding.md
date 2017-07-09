@@ -3,57 +3,53 @@
 Now is the time to get this page talking to the
 server!
 
-AngularJS has it's own AJAX service, named `$http`.
-You decide that you should use that to talk to the
-server.
+Angular has it's own AJAX service, defined in the
+`HttpModule` and provided by the `Http` class. You
+decide that you should use that to talk to the server.
 
-Right now, your files, `login-card.component.js` and
-`login-card.component.html` look like this:
+You open the `login-card.component.ts` file and review
+what you have in there.
 
-```javascript
-class LoginCardController {
-  constructor() {
-    this.username = '';
-    this.password = '';
+```typescript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-login-card',
+  templateUrl: './login-card.component.html',
+  styleUrls: ['./login-card.component.css']
+})
+export class LoginCardComponent implements OnInit {
+
+  private username = '';
+  private password = '';
+
+  constructor() { }
+
+  ngOnInit() {
   }
 
-  submitForm() {
+  get disableButton() {
+    return this.username.length === 0 ||
+           this.password.length === 0;
+  }
+
+  submitCredentials() {
     console.log('username:', this.username);
     console.log('password:', this.password);
+
     this.username = '';
     this.password = '';
   }
+
 }
-
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-    controller: [() => new LoginCardController()]
-  });
 ```
 
-```html
-<form ng-submit="login.submitForm()">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <div>{{ error }}</div>
-    <input autofocus type="text" placeholder="username" ng-model="login.username">
-    <input type="password" placeholder="password" ng-model="login.password">
-  </div>
-  <div class="card-actions">
-    <button class="button-primary" ng-disabled="login.username.length === 0 || login.password.length === 0">Watch time</button>
-  </div>
-</form>
-```
+## Getting the `Http` Service Into Your Controller
 
-## Getting the `$http` Service Into Your Controller
-
-You want to use the `$http` service that AngularJS
+You want to use the `Http` service that Angular
 provides to make AJAX calls. You want to *depend* on
-that service. Moreover, you want to ask AngularJS to
-give the `$http` service to your controller, to
+that service. Moreover, you want to ask Angular to
+give the `Http` service to your controller, to
 *inject* it into your controller so that you can use
 it.
 
@@ -61,279 +57,216 @@ This is known as **dependency injection**.
 
 [callout-info]
 **Dependency injection** is when you ask a framework,
-like AngularJS, to provide something to you so that
-you don't have to figure out how to get it yourself.
+like Angular, to provide something to you so that you
+don't have to figure out how to get it yourself.
 
-AngularJS has a lot of things that it can provide to
-you, `$http` being just one. As you continue your
-exploration of AngularJS, you'll run into more.
+Angular has a lot of things that it can provide to
+you, `Http` being just one. As you continue your
+exploration of Angular, you'll run into more.
 [/callout-info]
 
-To use dependency injection, you tell AngularJS the
-name of the thing that you want injected. AngularJS
-finds it and passes it to your controller or raises
-an error.
+To use dependency injection, you need to do two
+things:
 
-To get the `$http` service into your controller, you
-modify the registration of the controller in the
-`login-card.component.js` file. You provide the name
-of the service, `$http`, and then capture it in a
-parameter that you pass to the controller's
-constructor. You do this in the array of the
-`controller` property of the component's configuration
-object.
+1. Import any Angular module in your application
+   module that defines the thing you want (if
+   applicable); and,
+1. Define a constructor parameter with the type that
+   you want injected.
 
-```javascript
-controller: [
-  // Ask for the service by name
-  '$http',
+First up, you need to import the `HttpModule` and add
+it to your application module. You open
+`app.module.ts` and make the following additions.
 
-  // Capture it in a parameter and pass it to the
-  // constructor of the controller
-  ($http) => new LoginCardController($http)
-]
+```typescript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+// Import the HttpModule that defines the Http service
+import { HttpModule } from '@angular/http';
+
+import { AppComponent } from './app.component';
+import { RegistrationCtaComponent } from './registration-cta/registration-cta.component';
+import { LoginCardComponent } from './login-card/login-card.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    RegistrationCtaComponent,
+    LoginCardComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+
+    // Import the HttpModule into your application
+    // module
+    HttpModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
 ```
 
-Then, you need to create a constructor on the class
-to capture and save the service so you can use it
-when a person clicks the "WATCH TIME" button and
-submits the form.
+Now, you change the `LoginCardComponent` class'
+constructor to ask for an instance of the `Http`
+service.
 
-```javascript
-class LoginCardController {
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Http } from '@angular/http';
 
-  // Add the $http parameter to the constructor's
-  // signature so you can get it from AngularJS
-  constructor($http) {
-    this.username = '';
-    this.password = '';
+@Component({
+  selector: 'app-login-card',
+  templateUrl: './login-card.component.html',
+  styleUrls: ['./login-card.component.css']
+})
+export class LoginCardComponent implements OnInit {
 
-    // Set a property of the controller to the value
-    // of the provided service.
-    this.$http = $http;
+  private username = '';
+  private password = '';
+
+  // Get Angular to inject the Http service into your
+  // class when it creates your component. Now, you
+  // can use it to make AJAX calls!
+  constructor(private http: Http) { }
+
+  ngOnInit() {
   }
 
-  submitForm() {
+  get disableButton() {
+    return this.username.length === 0 ||
+           this.password.length === 0;
+  }
+
+  submitCredentials() {
     console.log('username:', this.username);
     console.log('password:', this.password);
+
     this.username = '';
     this.password = '';
   }
+
 }
 ```
 
-Now, your `login-card.component.js` file should look
-like this:
+## Using the `Http` Service to Authenticate
+
+You want to use the `Http` service to make a call to
+authenticate the person logging in. You make sure that
+you have Michaela's application running, pull up a
+browser, log in using "maria" as the username and
+"maria" as the password, then navigate a new browser
+to the API documentation at
+[http://localhost:5000/swagger-ui.html](http://localhost:5000/swagger-ui.html).
+There you see the Session API Controller that has a
+PUT method to `/api/session/mine` that expects a JSON
+payload containing the "username" and "password".
+Michaela mentioned that she had set up the API to set
+a cookie on a GET request that would act as a
+[CSRF token](https://angular.io/guide/security#xsrf)
+so you probably need to get that cookie set, first,
+with a GET call.
+
+You delete the contents of the `submitCredentials`
+method of the `LoginCardComponent` class in your
+component's `.js` file and use the `Http` service to
+make a call to the API endpoint. You put in the
+following code:
 
 ```javascript
-class LoginCardController {
-  constructor($http) {
-    this.username = '';
-    this.password = '';
-    this.$http = $http;
-  }
-
-  submitForm() {
-    console.log('username:', this.username);
-    console.log('password:', this.password);
-    this.username = '';
-    this.password = '';
-  }
-}
-
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-    controller: [
-      '$http',
-      ($http) => new LoginCardController($http)
-    ]
-  });
-```
-
-## Using the `$http` Service
-
-You look through Michaela's Java code and find the
-`SessionApiController` class that provides a way for
-you to log in a person by `PUT`ting a JSON object with
-`username` and `password` properties in an HTTP
-request to the URL path `/api/session/mine`.
-
-Now that you have the `$http` service in your
-controller, you head over to the [$http
-documentation](https://docs.angularjs.org/api/ng/service/$http)
-page and see that it has a shortcut method named
-`put()` that returns a
-[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-you can use to log in a person that's filled out the
-login form.
-
-You delete the contents of the `submitForm` method of
-the `LoginCardController` class in your component's
-`.js` file and use the `$http` service to make a call
-to the API endpoint. You put in the following code:
-
-```javascript
-submitForm() {
-  // Create an object to send to the API endpoint
-  // for logging in
-  let credentials = {
+submitCredentials() {
+  // Create the payload to send to the server
+  const payload = {
     username: this.username,
     password: this.password
-  }
+  };
 
-  // Use AJAX to PUT the credentials to the API
-  this.$http
-    .put('/api/session/mine', credentials)
-    .then(() => {
+  // Tell the AJAX request to send cookies
+  const options = {
+    withCredentials: true
+  };
 
-      // Show SUCCEEDED if all goes well!
-      alert('SUCCEEDED!');
+  // Put the URLs in convenience variables
+  const cookieUrl = 'http://localhost:5000/api/clients';
+  const sessionUrl = 'http://localhost:5000/api/session/mine';
 
-    })
-    .catch(() => {
+  // Make an AJAX call
+  this.http
 
-      // Show NO LOGIN if all goes poorly.
-      alert('NO LOGIN!');
+    // Get an CSRF token
+    .get(cookieUrl, options)
 
-    });
+    // If getting the CSRF token fails, then submit
+    // the login credentials to the server.
+    .catch(() => this.http.put(sessionUrl, payload, options))
+    .subscribe(
+
+      // If everything goes ok, clear the error and do
+      // something.
+      () => {
+        this.error = '';
+        console.log('logged in'); // This is temporary
+      },
+
+      // An error occurred when the credentials were
+      // PUT to the server.
+      e => {
+
+        // If the server responds with a 401, those
+        // were bad credentials and you set the error
+        // to an appropriate message.
+        if (e.status === 401) {
+          this.error = 'Could not log in with those credentials';
+        }
+      },
+    );
 }
+```
+
+You declare a new string variable named `error` after
+the `username` and `password` variables so that your
+new code will compile. You need a place to show the
+error message, when it gets set, so you open the
+component template and use the one-way data rendering
+syntax you learned when you did your data binding
+research.
+
+```html
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+
+  <!-- Show an error when it occurs -->
+  <div class="error">{{ error }}</div>
+
+  <div class="form-line">
+    <input type="text" placeholder="username" [(ngModel)]="username">
+  </div>
+  <div class="form-line">
+    <input type="password" placeholder="password" [(ngModel)]="password">
+  </div>
+</div>
+<div class="actions">
+  <button class="cta"
+          [disabled]="disableButton"
+          (click)="submitCredentials()">Watch time</button>
+</div>
 ```
 
 After you refresh the page and type a bad username and
-password, you see an alert that reads "NO LOGIN!".
-When you type in good credentials, like *maria* for
-both the username and password, you see an alert that
-reads "SUCCEEDED!" That was *so* easy!
+password, you see an error message that reads "Could
+not log in with those credentials". When you type in
+good credentials, like *maria* for both the username
+and password, you see no error (it will disappear if
+one was there, before) and you see a message in the
+console that reads "logged in".
 
-## Handling a Bad Login with More Data Binding
-
-In the event of a bad login, you want the UI to show
-that the person provided a bad set of credentials. So,
-you change the `catch` handler of the Promise to look
-like this.
-
-```javascript
-submitForm() {
-  let credentials = {
-    username: this.username,
-    password: this.password
-  }
-
-  this.$http
-    .put('/api/session/mine', credentials)
-    .then(() => {
-      alert('SUCCEEDED!');
-    })
-    .catch(() => {
-
-      // Show an error
-      this.error = 'Cannot login with that username and password';
-
-    });
-}
-```
-
-That will set the `error` property of the controller
-to that message. You remember seeing a place for an
-error message over in the HTML and find it where it
-reads
-
-```html
-<div>{{ error }}</div>
-```
-
-You feel lucky because Michaela used the Handlebars
-syntax for her Java templating which is the same
-syntax that AngularJS uses to output values into the
-HTML, too! All you need to do is put the controller's
-name in front of that variable name and you should be
-good to go!
-
-```html
-<div>{{ login.error }}</div>
-```
-
-You try logging in, again, with a bad username or
-password and, now, it shows the error message!
-
-## Handling a Good Login with a Redirect
-
-Last, and certainly not least, you want to redirect
-the browser to the main page if the person
-successfully logs in. Normally, you would just use
-`window.location.href = "some url"` to do that.
-However, AngularJS has a `$window` service that you
-can use for the same purpose which will prevent your
-code from having to rely on the global `window`
-object.
-
-You change your controller's registration in the
-`login-card.component.js` file to tell AngularJS that
-you want the `$window` service, as well.
-
-```javascript
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-    controller: [
-      '$http',
-
-      '$window', // Ask for the $window service
-
-      // Include it in the parameter list for your
-      // controller
-      ($http, $window) => new LoginCardController($http, $window)
-    ]
-  });
-```
-
-Then, you change the constructor of your controller to
-accept the new parameter.
-
-```javascript
-class LoginCardController {
-  constructor($http, $window) { // New parameter
-    this.username = '';
-    this.password = '';
-    this.$http = $http;
-    this.$window = $window; // Save the service
-  }
-```
-
-Now, you can use that when the user provides the
-correct login information in the `submitForm` method.
-
-```javascript
-submitForm() {
-  let credentials = {
-    username: this.username,
-    password: this.password
-  }
-  this.$http
-    .put('/api/session/mine', credentials)
-    .then(() => {
-
-      // Change the location of the browser to go to
-      // the main page.
-      this.$window.location.href = '/';
-
-    })
-    .catch(() => {
-      this.error = 'Cannot login with that username and password';
-    });
-}
-```
-
-And, **IT WORKS!** *YAY!*
-
-You take a deep breath and commit your code to source
-control so that you don't lose any of this hard work
-and learning that you've done, so far.
+You will need to do something for real after a person
+supplies a valid username and password. But, you take
+a moment to bask in all of the information that you've
+soaked in and used.
 
 ## What Did You Do?
 
@@ -341,22 +274,27 @@ In this section, you just created your first
 interactive component! That's amazing! You look down
 at your notes to review everything you did.
 
-* Created a component's files in a subdirectory, just
-  like last time, with the HTML and AngularJS
-  registration.
-* Defined and registered a controller to handle
-  interactive behavior
-* Used `ng-model` to bind to input fields
-* Used `ng-disabled` to disable a button based on the
-  values of the input fields
-* Used `ng-submit` to call a controller method when
-  a person submits the login form
-* Used AngularJS' AJAX service `$http` to make a PUT
+* Again, used the Angular CLI to generate a new
+  component
+* Used HTML and CSS to style the application and
+  component
+* Used `[(ngModel)]` two-way data binding to bind to
+  text inputs
+* Used `[disabled]` one-way data binding to set the
+  value of the property on a button
+* Used `(click)` to call a component method when
+  a person clicks the button
+* Used another of Angular's modules, `HttpModule` by
+  including it in the application module
+* Used type-based dependency injection to get an
+  instance of the `Http` service into the login
+  component
+* Used Angular's AJAX service `Http` to make a GET
+  request to get a CSRF token
+* Used Angular's AJAX service `Http` to make a PUT
   request to the server to log in the person
-* Displayed an error message by using AngularJS'
-  one-way data binding with `{{ variable_name }}`
-* Used AngularJS' `$window` service to redirect the
-  browser to the main page on a successful login
+* Displayed an error message by using Angular's
+  one-way data rendering with `{{ variable_name }}`
 
 You accomplished a lot! Most of the work from now on
 will look like this, you realize: creating components
@@ -371,55 +309,126 @@ better!
 `login-card.component.html`
 
 ```html
-<form ng-submit="login.submitForm()">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <div>{{ login.error }}</div>
-    <input autofocus type="text" placeholder="username" ng-model="login.username">
-    <input type="password" placeholder="password" ng-model="login.password">
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+  <div class="error">{{ error }}</div>
+  <div class="form-line">
+    <input type="text" placeholder="username" [(ngModel)]="username">
   </div>
-  <div class="card-actions">
-    <button class="button-primary" ng-disabled="login.username.length === 0 || login.password.length === 0">Watch time</button>
+  <div class="form-line">
+    <input type="password" placeholder="password" [(ngModel)]="password">
   </div>
-</form>
+</div>
+<div class="actions">
+  <button class="cta"
+          [disabled]="disableButton"
+          (click)="submitCredentials()">Watch time</button>
+</div>
 ```
 
-`login-card.component.js`
+`login-card.component.ts`
 
-```javascript
-class LoginCardController {
-  constructor($http, $window) {
-    this.username = '';
-    this.password = '';
-    this.$http = $http;
-    this.$window = $window;
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Http } from '@angular/http';
+
+import 'rxjs/add/operator/catch';
+
+@Component({
+  selector: 'app-login-card',
+  templateUrl: './login-card.component.html',
+  styleUrls: ['./login-card.component.css']
+})
+export class LoginCardComponent implements OnInit {
+
+  private username = '';
+  private password = '';
+  private error: string;
+
+  constructor(private http: Http) { }
+
+  ngOnInit() {
   }
 
-  submitForm() {
-    let credentials = {
+  get disableButton() {
+    return this.username.length === 0 ||
+           this.password.length === 0;
+  }
+
+  submitCredentials() {
+    const payload = {
       username: this.username,
       password: this.password
-    }
-    this.$http
-      .put('/api/session/mine', credentials)
-      .then(() => {
-        this.$window.location.href = '/';
-      })
-      .catch(() => {
-        this.error = 'Cannot login with that username and password';
-      });
+    };
+    const options = {
+      withCredentials: true
+    };
+    const cookieUrl = 'http://localhost:5000/api/clients';
+    const sessionUrl = 'http://localhost:5000/api/session/mine';
+    this.http
+      .get(cookieUrl, options)
+      .catch(() => this.http.put(sessionUrl, payload, options))
+      .subscribe(
+        () => {
+          this.error = '';
+          console.log('logged in');
+        },
+        e => {
+          if (e.status === 401) {
+            this.error = 'Could not log in with those credentials';
+          }
+        },
+      );
   }
+
+}
+```
+
+`login-card.component.css`
+
+```css
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  align-self: center;
+  padding: 0 0 8px 0;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, .24);
+  background-color: white;
+  margin-bottom: 8px;
 }
 
-angular
-  .module('app')
-  .component('loginCard', {
-    templateUrl: '/app/login-card/login-card.component.html',
-    controllerAs: 'login',
-    controller: [
-      '$http',
-      '$window',
-      ($http, $window) => new LoginCardController($http, $window)
-    ]
-  });
+.form-line {
+  display: flex;
+}
+
+input {
+  flex: 1 0 0px;
+}
+
+.figure {
+  background-color: #b3e5fc;
+}
+
+.figure img {
+  width: 100%;
+}
+
+.content {
+  padding: 8px 16px;
+}
+
+.actions {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error {
+  padding-top: 8px;
+}
+
+.error:empty {
+  padding-top: 0;
+}
 ```
