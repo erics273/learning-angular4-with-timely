@@ -272,7 +272,8 @@ soaked in and used.
 
 In this section, you just created your first
 interactive component! That's amazing! You look down
-at your notes to review everything you did.
+at your notes to review everything you did to finish
+this component.
 
 * Again, used the Angular CLI to generate a new
   component
