@@ -178,7 +178,7 @@ contents of `app.component.html` with a `router-outlet`
 tag so that it looks like this.
 
 ```html
-<!-- Hello, Routersvilled!  -->
+<!-- Hello, Routersville!  -->
 <router-outlet></router-outlet>
 ```
 
