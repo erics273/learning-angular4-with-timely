@@ -3,118 +3,162 @@
 You did a great job on converting that sign-up card.
 Here's one way to finish that assignment.
 
-## In `src/main/resources/templates/users/form.html`
+## In `app.component.html`
 
-Add your `app.module.js` to this page \
-Configure the page to be an AngularJS application
-with the `ng-app` attribute** \
-Create `.js` and `.html` files for a component named
-`sign-up-card` and organize them correctly
+I replaced the content of the main app page with just my
+new component so I could see it as I was developing it.
+Really soon, we won't have to do that anymore.
 
 ```html
-<!doctype html>
-<html>
-
-<head>
-  <title>Timeliness</title>
-  {{> common/head}}
-</head>
-
-<!-- Register the page as an AngularJS application -->
-<body ng-app="app">
-
-  <!-- Use the sign-up-card AngularJS component -->
-  <sign-up-card class="card login-card"></sign-up-card>
-
-  <script src="/js/angular-1.6.4.min.js"></script>
-  <script src="/js/angular-resource-1.6.4.min.js"></script>
-  <script src="/js/angular-ui-router-1.0.3.min.js"></script>
-
-  <!-- Register the application module -->
-  <script src="/app/app.module.js"></script>
-
-  <!-- Register the sign-up-card component -->
-  <script src="/app/sign-up-card/sign-up-card.component.js"></script>
-</body>
-
-</html>
+<!-- Hello, my new component! -->
+<app-sign-up-card></app-sign-up-card>
 ```
 
-## In `src/main/resources/static/app/sign-up-card/sign-up-card.component.html`
+## In `sign-up-card/sign-up-card.component.ts`
 
-Extract the HTML from `users/form.html` for the
-`.html` contents of the component \
-Replace the HTML in `users/form.html` with your
-custom `sign-up-card` component
+This looks strikingly similar to the
+`login-card.component.ts` file. They both have two input
+fields and a button and an image. Only the method name
+that handles the button click and the URL to which I POST
+the form has changed.
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Http } from '@angular/http';
+
+import 'rxjs/add/operator/catch';
+
+@Component({
+  selector: 'app-sign-up-card',
+  templateUrl: './sign-up-card.component.html',
+  styleUrls: ['./sign-up-card.component.css']
+})
+export class SignUpCardComponent implements OnInit {
+
+  private username = '';
+  private password = '';
+  private error: string;
+
+  constructor(private http: Http) { }
+
+  ngOnInit() {
+  }
+
+  get disableButton() {
+    return this.username.length === 0 ||
+           this.password.length === 0;
+  }
+
+  submitSignup() {
+    const payload = {
+      username: this.username,
+      password: this.password
+    };
+    const options = {
+      withCredentials: true
+    };
+    const cookieUrl = 'http://localhost:5000/api/clients';
+    const signUpUrl = 'http://localhost:5000/api/users';
+    this.http
+      .get(cookieUrl, options)
+      .catch(() => this.http.post(signUpUrl, payload, options))
+      .subscribe(
+        () => {
+          this.error = '';
+          console.log('logged in');
+        },
+        e => {
+          if (e.status === 401) {
+            this.error = 'Could not sign up with those credentials';
+          }
+        },
+      );
+  }
+
+}
+```
+
+## In `sign-up-card/sign-up-card.component.html`
+
+This also looks strikingly similar to the
+`login-card.component.html` file. They both have two input
+fields and a button and an image. Only the method name
+that handles the button click and the text of the button
+have changed.
+
 
 ```html
-<!-- Bind the submission of the form to the controller -->
-<form ng-submit="signUp.submitForm()">
-  <div class="card-art"></div>
-  <div class="card-content">
-    <h1>Sign up!</h1>
-
-    <!-- Show the error in signing up, if any -->
-    <div class="error-message">{{ signUp.error }}</div>
-
-    <!-- Bind the username to the controller -->
-    <input autofocus type="text" placeholder="username" name="username" ng-model="signUp.username">
-
-    <!-- Bind the password to the controller -->
-    <input type="password" placeholder="password" name="password" ng-model="signUp.password">
+<div class="figure"><img src="/assets/clock.png"></div>
+<div class="content">
+  <div class="error">{{ error }}</div>
+  <div class="form-line">
+    <input type="text" placeholder="username" [(ngModel)]="username">
   </div>
-  <div class="card-actions">
-
-    <!-- Disable the button based on the values of
-         the username and password -->
-    <button class="button-primary" ng-disabled="signUp.username.length === 0 || signUp.password.length === 0">Register!</button>
+  <div class="form-line">
+    <input type="password" placeholder="password" [(ngModel)]="password">
   </div>
-</form>
+</div>
+<div class="actions">
+  <button class="cta"
+          [disabled]="disableButton"
+          (click)="submitSignup()">Register!</button>
+</div>
 ```
 
-## In `src/main/resources/static/app/sign-up-card/sign-up-card.component.js`
+## In `sign-up-card/sign-up-card.component.css`
 
-Write your controller to `POST` the new user's
-username and password to the path `/api/users` \
-Handle successful username creation by redirecting
-them to the path `/` \
-Handle unsuccessful registrationm by showing an
-error.
+Identical to `login-card.component.css` except for the
+addition at the end of the style for the "Sign up!" card
+heading.
 
-```javascript
-class SignUpCardController {
-  constructor($http, $window) {
-    this.username = '';
-    this.password = '';
-    this.$http = $http;
-    this.$window = $window;
-  }
-
-  submitForm() {
-    let credentials = {
-        username: this.username,
-        password: this.password
-      }
-      this.$http
-        .post('/api/users', credentials)
-        .then(() => {
-          this.$window.location.href = '/';
-        })
-        .catch(() => {
-          this.error = 'Please select another username because that one is already being used';
-        });
-  }
+```css
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  align-self: center;
+  padding: 0 0 8px 0;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, .24);
+  background-color: white;
+  margin-bottom: 8px;
 }
 
-angular
-  .module('app')
-  .component('signUpCard', {
-    templateUrl: '/app/sign-up-card/sign-up-card.component.html',
-    controllerAs: 'signUp',
-    controller: [
-      '$http',
-      '$window',
-      ($http, $window) => new SignUpCardController($http, $window)
-    ]
-  });
+.form-line {
+  display: flex;
+}
+
+input {
+  flex: 1 0 0px;
+}
+
+.figure {
+  background-color: #b3e5fc;
+}
+
+.figure img {
+  width: 100%;
+}
+
+.content {
+  padding: 8px 16px;
+}
+
+.actions {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error {
+  padding-top: 8px;
+}
+
+.error:empty {
+  padding-top: 0;
+}
+
+.header {
+  font-weight: 300;
+  font-size: 2em;
+}
 ```
