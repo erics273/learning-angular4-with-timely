@@ -23,7 +23,7 @@ You decide to clean that up.
 ## Assignment
 
 <div style="font-size: 1.5em">
-  Migrate the header HTML to the
+  Migrate the header HTML in the
   <code>main-screen</code> component.
 </div>
 
@@ -67,15 +67,17 @@ Here.
   <span class="nt">&lt;/ul&gt;</span>
 <span class="nt">&lt;/nav&gt;</span>
 </code></pre>
+
+You won't need that CSRF thing, though.
 [/reveal]
 
 Don't know where to put the header HTML after you've
 found it?
 
 [reveal]
-In the
+Delete the existing content of
 <code>main-screen/main-screen.component.html</code>
-file.
+file and put the HTML in there.
 [/reveal]
 
 Don't know how to "clean up" the "SIGN OUT" button
@@ -91,9 +93,17 @@ Don't know how to hook up the "SIGN OUT" button?
 
 [reveal]
 Assuming you got the right HTML and put it in the
-<code>main-screen/main-screen.component.html</code>
-file, then on the <code>&lt;button&gt;</code> that
-has the content "Sign out", you should put an
-<code>ng-click</code> that calls the method on the
-controller.
+<code>main-screen/main-screen.component.html</code> file,
+then on the <code>&lt;button&gt;</code> that has the
+content "Sign out", you should put an <code>(click)</code>
+event handler that calls the method on the controller.
+[/reveal]
+
+What about all the CSS?
+
+[reveal]
+Find all the stuff in the Spring application in the
+<code>src/main/resources/static/css/site.css</code> file
+that starts with "app-bar" or "tabs" and copy that over to
+the `main-screen.component.css` file.
 [/reveal]
