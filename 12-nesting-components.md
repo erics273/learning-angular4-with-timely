@@ -5,76 +5,76 @@ you look at your login page, you see two components
 living on the same page, the `login-card` and the
 `registration-cta` components. They really belong
 together since someone using the software should only
-see them together according to the current UI design.
+see them together according to the current UI design. And,
+eventually, you're going to want to make both of them go
+away so you can show the sign-up component that you just
+created. So, you decide to work toward that.
 
-You decide to create a parent component for these two
-components as an exercise in discipline and to explore
-how difficult it would be.
+## Generate the Login Page Component
 
-## Create Files for a `login-page` Parent Component
+You use the Angular CLI to generate a new component named
+`login-page`.
 
-You create the `login-page` directory with the
-`login-page.component.js` and
-`login-page.component.html` files in it.
-
-You immediately go include it in the
-`session/login.html` page.
-
-```html
-  <script src="/app/registration-cta/registration-cta.component.js"></script>
-  <script src="/app/login-card/login-card.component.js"></script>
-
-  <!-- The new parent component -->
-  <script src="/app/login-page/login-page.component.js"></script>
-</body>
+```bash
+npm run ng generate component login-page
 ```
 
-## Create JavaScript for the `login-page` Parent Component
+That generated the normal files for us.
 
-In the `login-page.component.js` file, you just
-declare an AngularJS component and point it to the
-corresponding `.html` file.
-
-```javascript
-angular
-  .module('app')
-  .component('loginPage', {
-     templateUrl: '/app/login-page/login-page.component.html'
-  });
+```bash
+create src/app/login-page/login-page.component.css (0 bytes)
+create src/app/login-page/login-page.component.html (29 bytes)
+create src/app/login-page/login-page.component.spec.ts (650 bytes)
+create src/app/login-page/login-page.component.ts (284 bytes)
+update src/app/app.module.ts (851 bytes)
 ```
 
-## Create HTML for the `login-page` Parent Component
+## Put the Other Two Components Into the Login Page Component
 
-In the `login-page.component.html` file, you take the
-HTML from `session/login.html` and make it the content
-of the component's `.html` file.
+You open the `login-page.component.html` file and put the
+Login Card and Registration Call-To-Action components in
+there.
 
 ```html
-<login-card class="card login-card"></login-card>
-<registration-cta class="card login-card"></registration-cta>
+<app-login-card></app-login-card>
+<app-registration-cta></app-registration-cta>
 ```
 
-Then, you replace those two lines in
-`session/login.html` with your new component.
+## Put the new Login Page Comopnent Back in the Main App HTML
+
+You change the `app-component.html` to read this.
 
 ```html
-<body ng-app="app">
+<!-- Hello, my new component! -->
+<app-login-page></app-login-page>
+```
 
-  <!-- This replaces the login-card and
-       registration-cta components -->
-  <login-page></login-page>
+Your page refreshes and everything looks all right except
+for the layout. You inspect the elements and find that the
+`app-login-page` is affected by the flex layout but
+doesn't have any layout for itself. *Duh*, you think to
+yourself, *there's nothing in the
+`login-page.component.css` file!* So, you put some stuff
+in the `login-page.component.css` file to apply the same
+layout that you had before.
 
-  <script src="/js/angular-1.6.4.min.js"></script>
-  <script src="/js/angular-resource-1.6.4.min.js"></script>
+```css
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0px;
+}
 ```
 
 You save your files and Everything Just Works!
 
 ## What Did You Do?
 
-You experimented with AngularJS components and created
+You experimented with Angular components and created
 a simple parent component to render two other
-AngularJS components.
+Angular components.
 
-You smile at how easy that seemed. You decide it's
-time to tackle something potentially harder.
+You smile at how easy that seemed. Other than figuring out
+the CSS for the parent component, everything was really
+simple! You decide it's time to tackle something
+potentially harder.
