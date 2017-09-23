@@ -172,7 +172,7 @@ with a GET call.
 
 You delete the contents of the `submitCredentials`
 method of the `LoginCardComponent` class in your
-component's `.js` file and use the `Http` service to
+component's `.ts` file and use the `Http` service to
 make a call to the API endpoint. You put in the
 following code:
 
