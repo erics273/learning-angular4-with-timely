@@ -14,11 +14,12 @@ you'd make it a SPA because it's just a dumb old Web
 app, right now. You decided to take on the challenge
 and learn yourself a little Angular along the way.
 
-You go over to GitHub and create a fork from the repo,
-clone it, and run the Java application after following
-the directions in the README file. You open a browser
-to [http://localhost:5000](http://localhost:5000) and
-start figuring out the application.
+You go over to GitHub and create a fork from [the
+repo](https://github.com/tiy-curtissimo/timeliness), clone
+it, and run the Java application after following the
+directions in the README file. You open a browser to
+[http://localhost:5000](http://localhost:5000) and start
+figuring out the application.
 
 **Reminder** \
 You remind yourself that all of the

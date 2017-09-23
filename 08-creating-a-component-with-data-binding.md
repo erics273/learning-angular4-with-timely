@@ -1,8 +1,8 @@
 # Your Second Component (Part 2 of 3): Data and Action Binding
 
-You remember from a conversation that you had that
-there are two types of binding in JavaScript
-frameworks: data binding and action binding.
+You remember from a conversation that you had that there
+are three types of binding in JavaScript frameworks: data
+binding, action binding, and data rendering.
 
 **Data binding** occurs when a UI framework like
 Angular automatically associates the value of a
@@ -217,7 +217,7 @@ punctuation.
 
 ## Data Binding the Button's Disabled State
 
-A little bit of research show that you can control
+A little bit of research shows that you can control
 the value of the `disabled` property of the `<button>`
 using Angular.
 

@@ -44,13 +44,13 @@ export class LoginCardComponent implements OnInit {
 }
 ```
 
-## Getting the `Http` Service Into Your Controller
+## Getting the `Http` Service Into Your Component
 
 You want to use the `Http` service that Angular
 provides to make AJAX calls. You want to *depend* on
 that service. Moreover, you want to ask Angular to
-give the `Http` service to your controller, to
-*inject* it into your controller so that you can use
+give the `Http` service to your component, to
+*inject* it into your component so that you can use
 it.
 
 This is known as **dependency injection**.

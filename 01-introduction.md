@@ -15,10 +15,10 @@ SPA one step at a time.
 
 To get the most out of this unit, you should know HTML,
 JavaScript, and **TypeScript**. You must know
-**TypeScript**. Otherwise, a lot of what you see may
-not make sense. This particular unit uses a Java-based
-backend, so it'd be good to know that, too, but it's
-not necessary since all you have to do is run it.
+**TypeScript**. Otherwise, a lot of what you see may not
+make sense. This particular unit uses a Java-based
+backend, so it'd be good to know that, too, but it's not
+necessary since all you have to do is run it.
 
 We'll start with a little history lesson to understand
 how we got to where we are. Then, we'll dive into code
@@ -71,9 +71,20 @@ they skipped it and went to version 4.
 This unit refers to and uses the following software.
 Please install it before continuing.
 
-* [ng-cli](https://cli.angular.io/) - The Angular
+### For Angular Development
+
+* [@angular/cli](https://cli.angular.io/) - The Angular
   command line interface, used to generate stuff so you
   don't have to do it yourself.
 * [Visual Studio Code](https://code.visualstudio.com/)
   \- Arguably, the best text editor to use when creating
   Angular applications.
+
+### To Run the Backend
+
+You'll need the Java SDK 1.8 and PostgreSQL on your
+computer to run the *timely* application as the backend.
+To get everything put together, follow all of the
+instructions on the [*timely*
+project](https://github.com/tiy-curtissimo/timeliness)
+page over on GitHub.

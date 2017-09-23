@@ -81,10 +81,10 @@ their names and what you see in them.
   * `lint` - This probably runs the TypeScript linter.
   * `e2e` - You guess this runs the end-to-end tests.
 * `protractor.conf.js` - You
-  [duckduckgo](http://duckduckgo.com/) search this and
-  find out that it's an end-to-end testing framework
-  for Angular. You might end up writing some of that,
-  too.
+  [duckduckgo](https://duckduckgo.com/?q=protractor.conf)
+  this and find out that it's an end-to-end testing
+  framework for Angular. You might end up writing some of
+  that, too.
 * `tsconfig.json` - You see the "ts" prefix on there
   and figure that this is the configuration file for
   the TypeScript compiler, TypeScript being the

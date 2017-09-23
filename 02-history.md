@@ -28,19 +28,19 @@ Wikipedia](https://en.wikipedia.org/wiki/Ajax_(programming)):
 > on performance.
 
 As browsers became more powerful, Web developers took
-advantage of the increasing functionality offered
+advantage of the increasing functionality offered by
 JavaScript. In 1999, Microsoft took advantage of
-JavaScript's potential and invented the
-`XMLHttpRequest`, a way for programmers to use
-JavaScript to get data from an *Application Programming
-Interface* (API), without the browser having to reload
-the page. For more than five years, programmers
-discovered and used this new functionality without a
-common way to talk about it. In 2004 and 2005, Google
-widely published its Gmail and Google Maps Web
-applications that relied heavily on the
+JavaScript's potential and invented the `XMLHttpRequest`,
+a way for programmers to use JavaScript to get data from
+an *Application Programming Interface* (API) without the
+browser having to reload the page. For more than five
+years, programmers discovered and used this new
+functionality without a common way to talk about it. In
+2004 and 2005, Google widely published its Gmail and
+Google Maps Web applications that relied heavily on the
 `XMLHttpRequest` object. In a [paper describing the new
-Web applications](https://web.archive.org/web/20080702075113/http://www.adaptivepath.com/ideas/essays/archives/000385.php),
+Web
+applications](https://web.archive.org/web/20080702075113/http://www.adaptivepath.com/ideas/essays/archives/000385.php),
 Jesse James Garrett coined the term *AJAX* to label the
 programming model of using `XMLHttpRequest`.
 
@@ -89,18 +89,18 @@ into HTML like
 </div>
 ```
 
-The problem with this method is two-fold: XML is ugly
-and programmers didn't seem to like it, and to
-transform XML into HTML usually requires learning yet
-another not-so-fun language named XSLT. So, developers
-went in search of a different format for the data that
-they could use and found it in JSON. They could use
-just regular old JavaScript to use the data in JSON to
-create new DOM with the received information. But,
-that, too became arduous and boring.
+The problem with this method is two-fold: XML is ugly and
+programmers didn't seem to like it, and to transform XML
+into HTML usually requires learning yet another not-so-fun
+language named XSLT. So, developers went in search of a
+different format for the data that they could use and
+found it in JSON. They could use just regular old
+JavaScript to use the data in JSON to create new entries
+in the DOM with the received information. But, that, too
+became arduous and boring.
 
 When confronted with arduous and boring tasks, most
-programmers will fight the icky feeling by creating
+programmers will fight that icky feeling by creating
 something new to help them with their problems. Most
 had used some sort of server-side templating language
 like

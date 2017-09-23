@@ -11,9 +11,10 @@ always have a template and only one component can be
 instantiated per an element in a template.
 [/callout-info]
 
-In practice, what that means is, instead of writing
-some HTML like this and including it everywhere you
-want to use it
+In the days of jQuery when we didn't have frameworks that
+supported components, the blending of presentation, data,
+and behavior, we'd have to write some HTML like this
+everywhere we wanted "star ratings"
 
 ```html
 <div class="star-rating">
@@ -25,9 +26,7 @@ want to use it
 </div>
 ```
 
-in addition to some JavaScript using jQuery in some
-file like `site.js` where, somewhere in there, you
-might be able to find
+and, then, some jQuery like this in some JavaScript file
 
 ```javascript
 // DO NOT DELETE! THIS HANDLES RATINGS!
@@ -43,14 +42,15 @@ $('.star-rating').click(function (e) {
 });
 ```
 
-This is hard to maintain. Unless you get smart, you
-may end up with a lot of places that have the
-`<div class="star-rating">` block. And, because the
-JavaScript is in some file that contains a lot of
-other JavaScript that doesn't have anything to do with
-star-based ratings, figuring out where to go to fix
-a bug and making sure that it gets fixed in all the
-places can be really, really hard.
+and the HTML and JavaScript are not near each other which
+makes the maintenance of this kind of code organization
+difficult. Unless you get smart, you may end up with a lot
+of places that have the `<div class="star-rating">` block.
+And, because the JavaScript is in some file that contains
+a lot of other JavaScript that doesn't have anything to do
+with star-based ratings, figuring out where to go to fix a
+bug and making sure that it gets fixed in all the places
+can be really, really hard.
 
 So, Angular (and frameworks like Angular) say to you,
 "Hey, you want a little widget that represents a
