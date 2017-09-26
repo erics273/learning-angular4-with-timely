@@ -1,3 +1,5 @@
+<style>.m-coursecontent-table-outer { border: 0; }</style>
+
 # Services! Services! Services!
 
 You decide that before you get on with the creation of
@@ -92,110 +94,121 @@ entries data service.
 | complete | the id of the time entry | the updated time entry                 |
 | create   | the id of the client     | the list of all the day's time entries |
 
+## Creating the `TimeEntry` Class
+
+Here, Angular can't help with a model class because it
+will just be a regular old TypeScript class. You create a
+new directory under `app` and name it `models`. In there,
+you create a new file named `TimeEntry.ts` and put the
+following code into it.
+
+```typescript
+export class TimeEntry {
+  id: number;
+  watcher: any;
+  client: any;
+  fromTime: Date;
+  toTime: Date;
+}
+```
+
 ## Coding the Time Entries Service
 
-You create a new directory named `time-entries-data`
-under the `app` directory and create a file in it
-named `time-entries-data.service.js`.
+You generate a new service for time entries data with the
+following command:
 
-![timely - create the time-entries-data.service.js file](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/create-time-entries-data.service.js-file.png)
+```bash
+npm run ng generate service time-entries-data -- --flat=false
+```
 
-Then, you *immediately* add it to the `common/spa.html`
+which gives you the following service file
 
-This data service will rely on the `$http` service, so
-you write in the familiar boilerplate code that goes
-into the AngularJS files.
+```typescript
+import { Injectable } from '@angular/core';
 
-```javascript
-class TimeEntriesDataService {
-  constructor($http) {
-    this.$http = $http;
-  }
+@Injectable()
+export class TimeEntriesDataService {
+
+  constructor() { }
+
 }
-
-angular
-  .module('app')
-  .factory('timeEntriesData', [
-    '$http',
-    ($http) => new TimeEntriesDataService($http)
-  ]);
 ```
 
 ### Implementing the `getAll` Method
 
-You start off easy enough writing the `get` portion of
+You start off easy enough writing the `GET` portion of
 the `getAll` method in the `TimeEntriesDataService`
 class. But, you find yourself asking, "After invoking
-the `get` method of the `$http` object, what is this
+the `get` method of the `Http` object, what is this
 thing actually returning?"
 
-```javascript
-class TimeEntriesDataService {
-  constructor($http) {
-    this.$http = $http;
-  }
+```typescript
+import { Injectable } from '@angular/core';
+import { Http, RequestOptionsArgs } from '@angular/http';
+
+@Injectable()
+export class TimeEntriesDataService {
+
+  private options: RequestOptionsArgs = {
+    withCredentials: true
+  };
+  baseUrl = 'http://localhost:5000/api/entries'
+
+  constructor(private http: Http) { }
 
   getAll() {
-    return this.$http
-      .get('/api/entries')
+    return this.http
+      .get(this.baseUrl, this.options)
       // now what?
   }
+
 }
 ```
 
-You head over to the [AngularJS $http
-documenatation](https://docs.angularjs.org/api/ng/service/$http)
-and see right under the "General usage" section that
+You head over to the [Angular `Http`
+documentation](https://angular.io/api/http/Http) and see
+that `get` returns an `Observable<Response>`. You shake
+your head at this because your **data** service should
+return data, not a `Response` object for an HTTP request.
 
-> the response object has these properties:
-> * **data** – {string|Object} – The response body
->   transformed with the transform functions.
-> * **status** – {number} – HTTP status code of the
->   response.
-> * **headers** – {function([headerName])} – Header getter
->   function.
-> * **config** – {Object} – The configuration object that
->   was used to generate the request.
-> * **statusText** – {string} – HTTP status text of the
->   response.
-
-That **data** property looks pretty promsing, but
-what's up with the part about "the transform
-functions"? You search the documenation and, further
-down the page, you find the section "Transforming
-Requests and Responses". In there, you read
-
-> If the `Content-Type` is `application/json` or the
-> response looks like JSON, deserialize it using a
-> JSON parser.
+The [documentation for
+`Response`](https://angular.io/api/http/Response) shows
+that it inherits from `Body` which has a method named
+`json()` which returns an object of type `any`. Now, that
+sounds a lot better to you than returning an HTTP response
+object.
 
 Well, you figure that since the `@RestController` in
 Spring serializes its data as `application/json`, that
-`data` property on the response must be the list of
+return value from `json()` response must be the list of
 time entries that you want!
 
 You finish implementing the `getAll` method with that
 knowledge.
 
-```javascript
-class TimeEntriesDataService {
-  constructor($http) {
-    this.$http = $http;
+```typescript
+import { Injectable } from '@angular/core';
+import { Http, RequestOptionsArgs } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { TimeEntry } from 'app/models/time-entry';
+
+@Injectable()
+export class TimeEntriesDataService {
+
+  private options: RequestOptionsArgs = {
+    withCredentials: true
+  };
+  baseUrl = 'http://localhost:5000/api/entries'
+
+  constructor(private http: Http) { }
+
+  getAll() : Observable<TimeEntry[]> {
+    return this.http
+      .get(this.baseUrl, this.options)
+      .map(response => response.json());
   }
 
-  getAll() {
-    return this.$http
-      .get('/api/entries')
-      .then(response => response.data);
-  }
 }
-
-angular
-  .module('app')
-  .factory('timeEntriesData', [
-    '$http',
-    ($http) => new TimeEntriesDataService($http)
-  ]);
 ```
 
 ### Implementing the `complete` Method
@@ -206,23 +219,34 @@ which time entry to mark complete and set an end time
 for that time entry. With that knowledge, you knock
 out the `complete` method of your data service.
 
-```javascript
-class TimeEntriesDataService {
-  constructor($http) {
-    this.$http = $http;
+```typescript
+import { Injectable } from '@angular/core';
+import { Http, RequestOptionsArgs } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { TimeEntry } from 'app/models/time-entry';
+
+@Injectable()
+export class TimeEntriesDataService {
+
+  private options: RequestOptionsArgs = {
+    withCredentials: true
+  };
+  baseUrl = 'http://localhost:5000/api/entries'
+
+  constructor(private http: Http) { }
+
+  getAll() : Observable<TimeEntry[]> {
+    return this.http
+      .get(`${this.baseUrl}/completions`, this.options)
+      .map(response => response.json());
   }
 
-  getAll() {
-    return this.$http
-      .get('/api/entries')
-      .then(response => response.data);
+  complete(id) : Observable<TimeEntry> {
+    return this.http
+      .post(`${this.baseUrl}/completions`, { id }, this.options)
+      .map(response => response.json());
   }
 
-  complete(id) {
-    return this.$http
-      .post('/api/entries/completions', { id })
-      .then(repsonse => response.data);
-  }
 }
 ```
 
@@ -234,29 +258,40 @@ to create a new time entry. Feeling good about how
 quickly you're knocking out the code, you drive it
 home with the following implementation.
 
-```javascript
-class TimeEntriesDataService {
-  constructor($http) {
-    this.$http = $http;
+```typescript
+import { Injectable } from '@angular/core';
+import { Http, RequestOptionsArgs } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { TimeEntry } from 'app/models/time-entry';
+
+@Injectable()
+export class TimeEntriesDataService {
+
+  private options: RequestOptionsArgs = {
+    withCredentials: true
+  };
+  baseUrl = 'http://localhost:5000/api/entries'
+
+  constructor(private http: Http) { }
+
+  getAll() : Observable<TimeEntry> {
+    return this.http
+      .post(`${this.baseUrl}/completions`, { id }, this.options)
+      .map(response => response.json());
   }
 
-  getAll() {
-    return this.$http
-      .get('/api/entries')
-      .then(response => response.data);
+  complete(id) : Observable<TimeEntry> {
+    return this.http
+      .post(`${this.baseUrl}/completions`, { id }, this.options)
+      .map(response => response.json());
   }
 
-  complete(id) {
-    return this.$http
-      .post('/api/entries/completions', { id })
-      .then(repsonse => response.data);
+  create(clientId): Observable<TimeEntry> {
+    return this.http
+      .post(this.baseUrl, { client: { id: clientId } }, this.options)
+      .map(response => response.json());
   }
 
-  create(clientId) {
-    return this.$http
-      .post('/api/entries', { client: { id } })
-      .then(response => response.data);
-  }
 }
 ```
 
