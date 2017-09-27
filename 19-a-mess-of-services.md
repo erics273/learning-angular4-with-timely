@@ -76,8 +76,10 @@ public class WorkSpan {
   // Getters and setters
 
 }
-
 ```
+
+That leads to a couple of other classes, too,
+`TimeWatcher` and `Client`.
 
 Playing around with Timely, you know that it sets the
 `fromTime` to the current time when the `WorkSpan`
@@ -94,19 +96,38 @@ entries data service.
 | complete | the id of the time entry | the updated time entry                 |
 | create   | the id of the client     | the list of all the day's time entries |
 
-## Creating the `TimeEntry` Class
+## Creating the Model Classes
 
 Here, Angular can't help with a model class because it
 will just be a regular old TypeScript class. You create a
 new directory under `app` and name it `models`. In there,
-you create a new file named `TimeEntry.ts` and put the
-following code into it.
+you create a three new files named `client.ts`,
+`time-watcher.ts`, and `time-entry.ts` and put the following
+code into each.
 
 ```typescript
+export class Client {
+  id: number;
+  name: string;
+  isActive: boolean;
+}
+```
+
+```typescript
+export class TimeWatcher {
+  id: number;
+  username: string;
+}
+```
+
+```typescript
+import { Client } from './client';
+import { TimeWatcher } from './time-watcher';
+
 export class TimeEntry {
   id: number;
-  watcher: any;
-  client: any;
+  watcher: TimeWatcher;
+  client: Client;
   fromTime: Date;
   toTime: Date;
 }
@@ -202,7 +223,7 @@ export class TimeEntriesDataService {
 
   constructor(private http: Http) { }
 
-  getAll() : Observable<TimeEntry[]> {
+  getAll() : Observable<TimeEntry> {
     return this.http
       .get(this.baseUrl, this.options)
       .map(response => response.json());
@@ -235,9 +256,9 @@ export class TimeEntriesDataService {
 
   constructor(private http: Http) { }
 
-  getAll() : Observable<TimeEntry[]> {
+  getAll() : Observable<TimeEntry> {
     return this.http
-      .get(`${this.baseUrl}/completions`, this.options)
+      .get(this.baseUrl, this.options)
       .map(response => response.json());
   }
 
@@ -276,7 +297,7 @@ export class TimeEntriesDataService {
 
   getAll() : Observable<TimeEntry> {
     return this.http
-      .post(`${this.baseUrl}/completions`, { id }, this.options)
+      .get(this.baseUrl, this.options)
       .map(response => response.json());
   }
 
@@ -303,7 +324,7 @@ front-end, you did some full-stack development! You
 * read an existing Java controller;
 * extracted the API from the controller;
 * designed a data service; and,
-* investigated the `$http` service to implement your
+* investigated the `http` service to implement your
   data service.
 
 You remind yourself, though, there are two more
