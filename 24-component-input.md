@@ -8,7 +8,7 @@ that you don't have to be bothered with details. You
 figure you can hide complexity behind some custom tag
 and never have to worry about it, again.
 
-You look at Timely and, while it's pretty spiffy, you
+You look at Timely and, while it's pretty spiffy, yougi
 notice the custom dropdown that Michaela has used on
 the time entry page and the report page. Your use of
 it on the report page looks like this.
@@ -18,10 +18,14 @@ it on the report page looks like this.
   <div class="drop-down-decorator">
     <i class="material-icons">arrow_drop_down</i>
   </div>
-  <select class="full-width" name="id" id="clientId" required
-          ng-model="report.selectedClient"
-          ng-options="client.name for client in report.clients">
+  <select [(ngModel)]="selectedClientId"
+          class="full-width"
+          name="id"
+          id="clientId"
+          required>
     <option value=""></option>
+    <option *ngFor="let client of clients"
+            [value]="client.id">{{ client.name }}</option>
   </select>
 </div>
 ```
@@ -35,9 +39,9 @@ all the time.
 
 In the case of this dropdown, you see a bunch of
 markup, the collection to loop over
-(`report.clients`),
+(`clients`),
 the name of the property to display as text
-(`client.name`), and the `ng-model` binding to handle
+(`name`), and the `ngModel` binding to handle
 the two-way binding.
 
 *Hunh*, you think, *can I use two-way binding on a
@@ -53,8 +57,8 @@ directive functionality of AngularJS, something you
 don't want to go into because that could just get a
 little *messy*.
 
-Instead, you find the [Component-based application
-architecture](https://docs.angularjs.org/guide/component#component-based-application-architecture)
+Instead, you find the [Components -
+Architecture](https://angular.io/guide/architecture#components)
 documentation, again, and see the item in the bulleted
 list that starts
 
@@ -74,34 +78,28 @@ in the future.
 
 You go through the motions of making a new component:
 
-* create a directory named `fancy-drop-down` under the
-  `app` directory;
-* create a JavaScript file
-  `fancy-drop-down.component.js` in the directory and
-  register the component, create a controller
-  `class` for it, and set the controller alias to
-  `dropDown`;
-* create an HTML file
-  `fancy-drop-down.component.html` in the directory
-  and copy over the relevant HTML; and,
-* replace the HTML in `report.component.html` with
-  `fancy-drop-down`; and,
-* register the new component in the `common/spa.html`
-  file.
+```bash
+npm run ng generate component fancy-drop-down
+```
 
 You have some files, now, files that look like these.
 
-```javascript
-class FancyDropDownController {
-}
+```typescript
+import { Component, OnInit } from '@angular/core';
 
-angular
-  .module('app')
-  .component('fancyDropDown', {
-    templateUrl: '/app/fancy-drop-down/fancy-drop-down.component.html',
-    controller: [() => new FancyDropDownController()],
-    controllerAs: 'dropDown'
-  });
+@Component({
+  selector: 'app-fancy-drop-down',
+  templateUrl: './fancy-drop-down.component.html',
+  styleUrls: ['./fancy-drop-down.component.css']
+})
+export class FancyDropDownComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
 ```
 
 ```html
@@ -119,33 +117,32 @@ After moving that over, you realize the layout is all
 messed up, so you go poke in the `site.css` and see
 that the `single-row-chooser-main` CSS class provides
 width to the dropdown, so you put that on the
-`<fancy-drop-down>` element in the
+`<app-fancy-drop-down>` element in the
 `report.component.html`.
 
 ```handlebars
-<h1 ng-if="report.clients.length === 0" class="standalone-message">
+<h1 *ngIf="clients && !clients.length" class="standalone-message">
   You must first create some clients.
 </h1>
-<div ng-if="report.clients.length > 0">
+<div *ngIf="clients && clients.length">
   <div class="single-row-chooser">
 
     <!-- You're so fancy, you should be in Hollywood! -->
-    <fancy-drop-down class="single-row-chooser-main">
+    <app-fancy-drop-down class="single-row-chooser-main">
 
       <!-- How to get this <select> inside the
            component's markup? -->
-      <select class="full-width" name="id" id="clientId" required
-              ng-model="report.selectedClient"
-              ng-options="client.name for client in report.clients">
+      <select [(ngModel)]="selectedClientId" class="full-width" name="id" id="clientId" required>
         <option value=""></option>
+        <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
       </select>
-    </fancy-drop-down>
-
-    <button ng-disabled="!report.selectedClient"
-            ng-click="report.generate()"
-            class="button">Generate report</button>
+    </app-fancy-drop-down>
+    <button (click)="generate()"
+            [disabled]="!selectedClientId"
+            class="button-cta">Generate report</button>
   </div>
-  <table class="data-table" ng-if="report.data">
+
+  <table class="data-table" *ngIf="entries">
     <thead>
       <tr>
         <th class="data-table-main-column">Month</th>
@@ -153,9 +150,9 @@ width to the dropdown, so you put that on the
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="row in report.data">
-        <td class="data-table-main-column">{{ row.monthName }} {{ row.year }}</td>
-        <td class="data-table-numeric">{{ row.numberOfHoursWorked }}</td>
+      <tr *ngFor="let entry of entries">
+        <td class="data-table-main-column">{{ entry.monthName }} {{ entry.year }}</td>
+        <td class="data-table-numeric">{{ entry.numberOfHoursWorked }}</td>
       </tr>
     </tbody>
   </table>
@@ -174,7 +171,7 @@ duckduckgo*.
 
 You decide to try to figure out how to pass the
 `<option>` tags from the parent template into the
-`<fancy-drop-down>` component. You try a myriad of
+`<app-fancy-drop-down>` component. You try a myriad of
 search terms, most of them not giving you what you
 want. You start to get frustrated because, it should
 not be this hard.
@@ -185,17 +182,15 @@ not be this hard.
 * "angularjs component innerhtml"
 * "angularjs container component"
 
-Then, you run across something called "transclusion"
-in that last search. You want to just get up and walk
-away from it all. "Transclusion"?!?! Seriously? You
-search for that and, sure enough, right there on the
-component configuration object is a `transclude`
-property that enables this feature. There's also an
-`ng-transclude` attribute for where stuff goes.
+Then, you run across something called "transclusion" in
+that last search. You want to just get up and walk away
+from it all. "Transclusion"?!?! Seriously? You search for
+that and, sure enough, there's an `ng-content` tag for
+where stuff goes.
 
 You push yourself away from the desk and lean back in
 your chair. At this moment, at this very moment, you
-wonder if AngularJS is the right choice for this
+wonder if Angular is the right choice for this
 project. You wonder to yourself why the authors of the
 framework would create such an obtuse name for such an
 important feature.
@@ -214,22 +209,6 @@ You modify your component files to include these newly
 found dumbly named things and, everything works like
 magic.
 
-```javascript
-class FancyDropDownController {
-}
-
-angular
-  .module('app')
-  .component('fancyDropDown', {
-    templateUrl: '/app/fancy-drop-down/fancy-drop-down.component.html',
-    controller: [() => new FancyDropDownController()],
-    controllerAs: 'dropDown',
-
-    // Transclude this...
-    transclude: true
-  });
-```
-
 ```html
 <div class="drop-down-holder single-row-chooser-main">
   <div class="drop-down-decorator">
@@ -237,73 +216,54 @@ angular
   </div>
 
   <!-- I got some transclude for you, AngularJS! -->
-  <div ng-transclude></div>
+  <ng-content></ng-content>
 </div>
 ```
 
 Hopefully, the rest of this isn't as dumb.
 
-## In Which You Discover That Yes, It's Just as Dumb
+## In Which You Discover That It's Not Hard to Do Hard Things
 
 You decide to parameterize the icon that the dropdown
 uses because, well, it is **fancy**, after all. You
-want the `<fancy-drop-down>` to show the drop down
+want the `<app-fancy-drop-down>` to show the drop down
 arrow unless the HTML specifies differently. So
 
-`<fancy-drop-down>...</fancy-drop-down>`
+`<app-fancy-drop-down>...</app-fancy-drop-down>`
 
 shows the arrow while
 
-`<fancy-drop-down icon-name="pets">...</fancy-drop-down>`
+`<fancy-drop-down icon-name="pets">...</app-fancy-drop-down>`
 
 shows a paw print instead of an arrow.
 
-You go to the input and output section of the
-components page of the Developer's Guide. There it
-says that you have to specify *binding* and use some
-symbol based on what kind of value you want to bind
-to.
+You go to the input and output section of the components
+page of the Developer's Guide. There it says that you have
+to specify *binding* and use the `@Input` decorator to
+allow components to receive information through their
+markup.
 
-| Symbol | Kind of binding               |
-|--------|-------------------------------|
-| @      | A plain old string            |
-| <      | One-way binding to a variable |
-| =      | Two-way binding to a variable |
+```typescript
+import { Component, OnInit, Input } from '@angular/core';
 
-Well, you just want a string, so you decide to use the
-@ symbol. You have to use the correct case for the
-name of the property just like you did with the
-component name, camel case in JavaScript, kebab case
-in HTML.
+@Component({
+  selector: 'app-fancy-drop-down',
+  templateUrl: './fancy-drop-down.component.html',
+  styleUrls: ['./fancy-drop-down.component.css']
+})
+export class FancyDropDownComponent implements OnInit {
 
-You add the binding to the component configuration
-object and a default value in the `$onInit` method.
+  @Input()
+  private icon: string;
 
-```javascript
-class FancyDropDownController {
-  $onInit() {
-
-    // The default icon to use is the boring one.
-    this.iconName = 'arrow_drop_down';
+  constructor() {
+    this.icon = 'arrow_drop_down';
   }
+
+  ngOnInit() {
+  }
+
 }
-
-angular
-  .module('app')
-  .component('fancyDropDown', {
-    templateUrl: '/app/fancy-drop-down/fancy-drop-down.component.html',
-    controller: [() => new FancyDropDownController()],
-    controllerAs: 'dropDown',
-    transclude: true,
-
-    // Create a binding for the component
-    bindings: {
-
-      // An input binding that accepts a plain old
-      // string in the HTML
-      iconName: '@'
-    }
-  });
 ```
 
 Sure enough, that looks the same that it did before,
@@ -317,33 +277,23 @@ just on a lark, to see what that looks like.
 
 ```html
 <!-- Make it pet friendly, not just for service animals. -->
-<fancy-drop-down class="single-row-chooser-main" icon-name="pets">
-  <select class="full-width" name="id" id="clientId" required
-          ng-model="report.selectedClient"
-          ng-options="client.name for client in report.clients">
-    <option value=""></option>
-  </select>
-</fancy-drop-down>
+<div class="drop-down-holder single-row-chooser-main">
+  <div class="drop-down-decorator">
+    <i class="material-icons">{{ icon }}</i>
+  </div>
+  <ng-content></ng-content>
+</div>
 ```
 
 ![timely - report
 page](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/empty-report-page-with-paw-print.png)
 
-That worked. But, you feel that weird binding language
-is pretty stupid, using @, <, and = rather than
-*words* or something.
-
-You see that if you needed to pass the value of some
-variable or some complex object instead of just a
-string, you'd need to use the '<' symbol.
-
-The documentation says to stay away from '=', so you
-probably will.
+That worked!
 
 ## What Did You Do?
 
 Well, mainly, you got frustrated by made-up words and
-silly symbols. But, AngularJS works as advertised. You
+silly symbols. But, Angular works as advertised. You
 realize, though, that you're going to have to practice
 saying that word enough so that it becomes part of
 your everyday speech so you can talk to others about
@@ -355,15 +305,11 @@ it.
 
 "Transclusion."
 
-And, you'll have to keep those notes around to
-remember the difference between '<', '@', and '=' for
-input bindings.
-
 «sigh»
 
 Oh well.
 
 You use your new component to replace the one on the
-time entry screen, too. Yay, `<fancy-drop-down>`! You
+time entry screen, too. Yay, `<app-fancy-drop-down>`! You
 may have some weird on the inside but, from the
 outside, you're beautiful.
