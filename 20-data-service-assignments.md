@@ -1,6 +1,6 @@
 # More Data Services
 
-You want that datas! You look at the list of API
+You want the datas! You look at the list of API
 controllers and mentally mark off the
 `TimeEntriesApiController` from the list.
 
