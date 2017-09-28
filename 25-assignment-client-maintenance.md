@@ -16,23 +16,19 @@ URLs:
   and the client to edit
 
 You realize that `/clients/new` and
-`/clients/«clientId»` are just nested states of the
+`/clients/«clientId»` are just child paths of the
 state that represents `/clients`. You know how to make
-nested states! The only thing you need to figure out
+child paths! The only thing you need to figure out
 is that `clientId` parameter thing and how to use it
-with `ui-router` `resolve`s, but you know you can find
-it on the
-[ui-router](https://ui-router.github.io) site. You
-keep a browser open to the [ui-router
-API](https://ui-router.github.io/ng1/docs/latest/) to
+with the Angular Router. You
+keep a browser open to the [Routing & Navigation](https://angular.io/guide/router) to
 keep all the weirdness close to you. The documentation
 is kind of hard to read; you know that this is just a
 pill you'll have to swallow. So you don't worry to much
-about that. You know about component bindings from the
-dropdown component. You're covered.
+about that.You're covered.
 
-Otherwise, it's just data-binding and some `ui-sref`s
-and some `ng-click` handling.
+Otherwise, it's just data-binding and some `routerLink`s
+and some `(click)` handling.
 
 You know you can do this. You work slowly and
 methodically, knocking out each piece of functionality
@@ -42,9 +38,6 @@ of the application Just Works!
 During the work, you refer back to the documentation
 that you've come across and the code that you've
 written. Luckily, you had it handy.
-
-* [ui-router state parameters](https://ui-router.github.io/ng1/tutorial/hellosolarsystem#state-parameters)
-* [nesting states in ui-router](https://ui-router.github.io/ng1/tutorial/hellogalaxy#nesting-states)
 
 The rest you know, you've come across it many times,
 like handling clicks and form submissions. You know
