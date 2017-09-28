@@ -233,7 +233,7 @@ arrow unless the HTML specifies differently. So
 
 shows the arrow while
 
-`<fancy-drop-down icon-name="pets">...</app-fancy-drop-down>`
+`<fancy-drop-down name="pets">...</app-fancy-drop-down>`
 
 shows a paw print instead of an arrow.
 
