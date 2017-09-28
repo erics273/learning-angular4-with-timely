@@ -32,53 +32,48 @@ When the person clicks the start button, then it should
 call a method on the controller that will call the
 `create` method of the time entry service.
 
-A little `ng-if`, a sprinkle of `ng-repeat`, a dash
-of `ng-click` and you think you can get this worked
-out in no time!
+A little `*ngIf`, a sprinkle of `*ngFor`, a dash of
+`(click)` and you think you can get this worked out in no
+time!
 
 ## Hints, If You Need Them
 
-You can't get the data services into the time entry
-component?
+### You can't get the data services into the time entry component?
 
-[reveal]
 You need to do some dependency injection.
 
-```javascript
-class TimeEntriesController {
-  constructor(clientsData, timeEntriesData) {
-    this.clientsData = clientsData;
-    this.timeEntriesData = timeEntriesData;
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { TimeEntriesDataService } from 'app/time-entries-data/time-entries-data.service';
+import { ClientDataService } from 'app/client-data/client-data.service';
+
+@Component({
+  selector: 'app-time-entries',
+  templateUrl: './time-entries.component.html',
+  styleUrls: ['./time-entries.component.css']
+})
+export class TimeEntriesComponent implements OnInit {
+
+  constructor(
+    private entriesData: TimeEntriesDataService,
+    private clientData: ClientDataService
+  ) { }
+
+  ngOnInit() {
   }
+
 }
-
-angular
-  .module('app')
-  .component('timeEntries', {
-    templateUrl: '/app/time-entries/time-entries.component.html',
-    controllerAs: 'timeEntries',
-    controller: [
-      'clientsData',
-      'timeEntriesData',
-      (clientsData, timeEntriesData) => new TimeEntriesController(clientsData, timeEntriesData)]
-  });
 ```
-[/reveal]
 
-Forgot how to show something based on a condition?
 
-[reveal]
-Use `ng-if`: <a href="https://docs.angularjs.org/api/ng/directive/ngIf">https://docs.angularjs.org/api/ng/directive/ngIf</a>
-[/reveal]
+### Forgot how to show something based on a condition?
 
-Forgot how to handle a button click?
+Use `*ngIf`: https://angular.io/guide/structural-directives#ngif-case-study
 
-[reveal]
-Use `ng-click`: <a href="https://docs.angularjs.org/api/ng/directive/ngClick">https://docs.angularjs.org/api/ng/directive/ngClick</a>
-[/reveal]
+### Forgot how to handle a button click?
 
-Forgot how to loop over a list?
+Use `(click)`: https://angular.io/guide/template-syntax#event-binding---event-
 
-[reveal]
-Use `ng-repeat`: <a href="https://docs.angularjs.org/api/ng/directive/ngRepeat">https://docs.angularjs.org/api/ng/directive/ngRepeat</a>
-[/reveal]
+### Forgot how to loop over a list?
+
+Use `*ngFor`: https://angular.io/guide/structural-directives#inside-ngfor
