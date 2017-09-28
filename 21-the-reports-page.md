@@ -26,73 +26,118 @@ You decide to tackle this in phases:
 1. React to the button click and get report data.
 1. Show the report data.
 
+## Registering the Data Services
+
+You need client and report data services in this
+component. You decide to register them with the entire
+application. You open `app.module.ts`, import the three
+services near the top of the document, and add them to the
+`providers` list in the `@NgModule` decorator, just like
+you did the `AuthenticationService` and `LoggedInGuard`.
+
+```typescript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpModule } from '@angular/http';
+import { RouterModule, Routes } from '@angular/router';
+
+import { AppComponent } from './app.component';
+import { RegistrationCtaComponent } from './registration-cta/registration-cta.component';
+import { LoginCardComponent } from './login-card/login-card.component';
+import { SignUpCardComponent } from './sign-up-card/sign-up-card.component';
+import { LoginPageComponent } from './login-page/login-page.component';
+import { MainScreenComponent } from './main-screen/main-screen.component';
+import { LoggedInGuard } from './logged-in.guard';
+import { AuthenticationService } from './authentication/authentication.service';
+import { TimeEntriesComponent } from './time-entries/time-entries.component';
+import { ClientsListComponent } from './clients-list/clients-list.component';
+import { ReportComponent } from './report/report.component';
+
+// NEW AND IMPROVED (WELL, NOT IMPROVED, BUT NEW) DATA
+// SERVICES FOR THE APPLICATION
+import { TimeEntriesDataService } from 'app/time-entries-data/time-entries-data.service';
+import { ReportDataService } from 'app/report-data/report-data.service';
+import { ClientDataService } from 'app/client-data/client-data.service';
+
+
+const appRoutes: Routes = [
+  { path: 'login',  component: LoginPageComponent },
+  { path: 'signup', component: SignUpCardComponent },
+  {
+    path: 'main',
+    component: MainScreenComponent,
+    canActivate: [LoggedInGuard],
+    children: [
+      { path: 'clients', component: ClientsListComponent },
+      { path: 'entries', component: TimeEntriesComponent },
+      { path: 'report',  component: ReportComponent },
+      { path: '', redirectTo: 'entries', pathMatch: 'full' }
+    ]
+  },
+  { path: '',  redirectTo: '/login', pathMatch: 'full' }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    RegistrationCtaComponent,
+    LoginCardComponent,
+    SignUpCardComponent,
+    LoginPageComponent,
+    MainScreenComponent,
+    TimeEntriesComponent,
+    ClientsListComponent,
+    ReportComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    HttpModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [
+    LoggedInGuard,
+    AuthenticationService,
+
+    // HELLO, NEW DATA SERVICES FOR THE APP
+    ClientDataService,
+    ReportDataService,
+    TimeEntriesDataService
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
 ## Inject and Use the Client Data Service
 
-You open `report.component.js` and tell AngularJS that
+You open `report.component.ts` and tell Angular that
 you want the client data service provided for the
 controller.
 
-```javascript
-class ReportController {
-  constructor(clientsData) {
-    this.clientsData = clientsData;
-  }
-}
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { ClientDataService } from 'app/client-data/client-data.service';
+import { Client } from 'app/models/client';
 
-angular
-  .module('app')
-  .component('report', {
-    templateUrl: '/app/report/report.component.html',
-    controllerAs: 'report',
-    controller: [
-      'clientsData',
-      (clientsData) => new ReportController(clientsData)]
-  });
-```
+@Component({
+  selector: 'app-report',
+  templateUrl: './report.component.html',
+  styleUrls: ['./report.component.css']
+})
+export class ReportComponent implements OnInit {
 
-Now that your component has a data service to get
-client data, you want to use it.
+  private clients: Client[];
 
-In your reading, yesterday, you remember something
-about component lifecycles in the AngularJS Developer's
-Guide. You do a quick search and find it on the
-*Components* page in the [Component-based application
-architecture](https://docs.angularjs.org/guide/component#component-based-application-architecture)
-section. There, you read:
+  constructor(private clientData: ClientDataService) { }
 
-> **Components have a well-defined lifecycle** \
-> Each
-> component can implement "lifecycle hooks". These are
-> methods that will be called at certain points in the
-> life of the component. The following hook methods can
-> be implemented:
->
-> * `$onInit()` - Called on each controller after all
->   the controllers on an element have been constructed
->   and had their bindings initialized (and before the
->   pre & post linking functions for the directives on
->   this element). This is a good place to put
->   initialization code for your controller.
-> * ... more ...
-
-That `$onInit()` looks like the right place to use the
-client data service to get the client data. You
-implement that method on the `ReportController` and
-save the returned client data to a property named
-clients.
-
-```javascript
-class ReportController {
-  constructor(clientsData) {
-    this.clientsData = clientsData;
-  }
-
-  // Hello, initializer!
-  $onInit() {
-    this.clientsData
+  ngOnInit() {
+    this.clientData
       .getAll()
-      .then(clients => this.clients = clients);
+      .subscribe(clients => this.clients = clients);
   }
+
 }
 ```
 
@@ -101,7 +146,9 @@ open `report.component.html` and replace its content
 with
 
 ```handlebars
-{{ report.clients }}
+<pre>
+{{ clients | json }}
+</pre>
 ```
 
 You open a new browser window, type in
@@ -122,7 +169,7 @@ That's awesome!
 
 You click the "SIGN OUT" button, refresh the page, and
 log back in using the username "hector" and the
-password "hector". You click ont he "REPORT" tab and
+password "hector". You click on the "REPORT" tab and
 see an empty list returned.
 
 ```json
@@ -147,24 +194,24 @@ replace the content of `report.component.html` with it.
 
 You only want that message to appear if there are no
 clients. To do conditional display like that, you
-recall that AngularJS provides the `ng-if` attribute
+recall that Angular provides the `*ngIf` attribute
 directive thing which works kind of like a JavaScript
-`if` statement. You use the `ng-if` to show the message
-only when their are no clients.
+`if` statement. You use the `*ngIf` to show the message
+when clients has a value and that the list is empty.
 
 ```html
-<h1 ng-if="report.clients.length === 0" class="standalone-message">
+<h1 *ngIf="clients && !clients.length" class="standalone-message">
   You must first create some clients.
 </h1>
 ```
 
 When you look at the report page for "hector", you see
 
-![timely - AngularJS showing no clients](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/ng-if-on-report-screen.png)
+![timely - Angular showing no clients](https://tiy-corp-train.github.io/newline-media/learning-angular-with-timely/ng-if-on-report-screen.png)
 
 and when you look at it for "maria", you see nothing.
-The `ng-if` works as advertised! You thank the
-AngularJS Overlords and move on to your next story.
+The `*ngIf` works as advertised! You thank the
+Angular Overlords and move on to your next story.
 
 ## Show a Client Dropdown and a Disabled Button
 
@@ -174,10 +221,10 @@ shows the chooser from lines 36 - 54 in
 inside a `<div>` so you can control it with an `ng-if`.
 
 ```html
-<h1 ng-if="report.clients.length === 0" class="standalone-message">
+<h1 *ngIf="clients && !clients.length" class="standalone-message">
   You must first create some clients.
 </h1>
-<div ng-if="report.clients.length > 0">
+<div *ngIf="clients && clients.length">
   <div class="single-row-chooser">
     <div class="drop-down-holder single-row-chooser-main">
       <div class="drop-down-decorator">
@@ -200,47 +247,34 @@ inside a `<div>` so you can control it with an `ng-if`.
 </div>
 ```
 
-Now, you need to change it to use AngularJS mechanisms
+Now, you need to change it to use Angular mechanisms
 rather than `mustache` mechanisms to populate the
 `<select>` element. You do a quick
 [duckduckgo.com](http://duckduckgo.com) search and find
-that AngularJS has the `ng-options` attribute
-directive. You go to its [documentation
-page](https://docs.angularjs.org/api/ng/directive/ngOptions)
-and learn that you can use a statement like "*label*
-**for** *value* **of** *array*" to populate the
-`<option>`s for the `<select>` element. You also see
-that the documentation says that you can leave an empty
-`<option>` in there, if you want to. So, you choose to
-do that.
-
-You see that the documentation states that you have to
-have an `ng-model` on the `<select>`, too, for
-`ng-options` to work. So, you add that on there, too,
-and set it to a property named `selectedClient` which
-seems like a good name.
+that you should just use an `*ngFor` to create a bunch of
+`<option>` tags for the `<select>` and two-way binding for
+the `<select>`.
 
 ```html
-<h1 ng-if="report.clients.length === 0" class="standalone-message">
+<h1 *ngIf="clients && !clients.length" class="standalone-message">
   You must first create some clients.
 </h1>
-<div ng-if="report.clients.length > 0">
+<div *ngIf="clients && clients.length">
   <div class="single-row-chooser">
     <div class="drop-down-holder single-row-chooser-main">
       <div class="drop-down-decorator">
         <i class="material-icons">arrow_drop_down</i>
       </div>
 
-      <!-- Hello, ng-model to bind a value!
-           Hello, ng-options to make <option>s! -->
-      <select class="full-width" name="id" id="clientId" required
-              ng-model="report.selectedClient"
-              ng-options="client.name for client in report.clients">
+      <!-- Bind the select to the "selectedClientId" field -->
+      <select [(ngModel)]="selectedClientId" class="full-width" name="id" id="clientId" required>
         <option value=""></option>
-      </select>
 
+        <!-- Loop over the clients and populate the select -->
+        <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
+      </select>
     </div>
-    <button disabled class="button">Generate report</button>
+    <button class="button-cta">Generate report</button>
   </div>
 </div>
 ```
@@ -251,36 +285,41 @@ You realize that this is like the disabling of the
 button on the login form. Except, instead of a string,
 you will enable or disable the button based on the
 length of a string value, you will base it on whether
-the `selectedClient` property has a value.
+the `selectedClientId` property has a value.
 
 Because your JavaScript-fu is strong, you change that
-`disabled` property on the button to an `ng-disabled`
-property and set it equal to
-`not-falsey-value-of-selectedClient`.
+`disabled` property on the button to an `[disabled]`
+property binding and set it equal to
+`not-falsey-value-of-selectedClientId`.
 
 ```html
-<h1 ng-if="report.clients.length === 0" class="standalone-message">
+<h1 *ngIf="clients && !clients.length" class="standalone-message">
   You must first create some clients.
 </h1>
-<div ng-if="report.clients.length > 0">
+<div *ngIf="clients && clients.length">
   <div class="single-row-chooser">
     <div class="drop-down-holder single-row-chooser-main">
       <div class="drop-down-decorator">
         <i class="material-icons">arrow_drop_down</i>
       </div>
-      <select class="full-width" name="id" id="clientId" required
-              ng-model="report.selectedClient"
-              ng-options="client.name for client in report.clients">
+      <select [(ngModel)]="selectedClientId" class="full-width" name="id" id="clientId" required>
         <option value=""></option>
+        <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
       </select>
     </div>
 
-    <!-- Button on when selectedClient is truthy.
-         Button off when selectedClient is falsey. -->
-    <button ng-disabled="!report.selectedClient" class="button">Generate report</button>
+    <!-- Add a disabled binding to make it off when nothing is selected -->
+    <button [disabled]="!selectedClientId" class="button-cta">Generate report</button>
   </div>
 </div>
 ```
+
+## Styling the Drop Down
+
+You head back to Michaela's style file and hunt down all
+the styles needed to make the `single-row-chooser` and
+all the other stuff look right and paste it to the end of
+the global `styles.css` file in the `src` directory.
 
 ## Getting the Report When the Button Gets Clicked
 
@@ -289,9 +328,9 @@ button, but you are having a brain fart. You can't
 remember how to do it, but you remember doing it for
 the "SIGN OUT" button. You open the
 `main-screen.component.html` file and see that it's
-`ng-click`.
+`(click)`.
 
-`ng-click`! That's right!
+`(click)`! That's right!
 
 You set up the `<button>` to call a method named
 `generate` on the controller.
@@ -300,74 +339,143 @@ You set up the `<button>` to call a method named
       </select>
     </div>
 
-    <!-- Call generate() on the controller when clicked! -->
-    <button ng-disabled="!report.selectedClient"
-            ng-click="report.generate()"
-            class="button">Generate report</button>
+    <!-- Call generate() on the component when clicked! -->
+    <button (click)="generate()"
+            [disabled]="!selectedClientId"
+            class="button-cta">Generate report</button>
   </div>
 </div>
 ```
 
-You open the corresponding `.js` file for the
-component, `report.component.js`, and add the
+You open the corresponding `.ts` file for the
+component, `report.component.ts`, and add the
 `generate()` method.
 
 You realize you've come to the point where you need
-AngularJS to give you the report data service. You
-change the registration to ask for it and take care of
-saving it in the constructor.
+Angular to give you the report data service. You
+change the constructor to ask for it.
 
-```javascript
-class ReportController {
-  constructor(clientsData, reportData) {
-    this.clientsData = clientsData;
-    this.reportData = reportData;
-  }
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { ClientDataService } from 'app/client-data/client-data.service';
+import { Client } from 'app/models/client';
+import { ReportDataService } from 'app/report-data/report-data.service';
 
-  $onInit() {
-    this.clientsData
+@Component({
+  selector: 'app-report',
+  templateUrl: './report.component.html',
+  styleUrls: ['./report.component.css']
+})
+export class ReportComponent implements OnInit {
+
+  private clients: Client[];
+
+  constructor(
+    private clientData: ClientDataService,
+    private reportData: ReportDataService
+  ) {}
+
+  ngOnInit() {
+    this.clientData
       .getAll()
-      .then(clients => this.clients = clients);
+      .subscribe(clients => this.clients = clients);
   }
 
   generate() {
-
   }
-}
 
-angular
-  .module('app')
-  .component('report', {
-    templateUrl: '/app/report/report.component.html',
-    controllerAs: 'report',
-    controller: [
-      'clientsData',
-      'reportData',
-      (clientsData, reportData) => new ReportController(clientsData, reportData)]
-  });
+}
 ```
 
 You look back at the report data service to see how you
-defined it. You see that you need to call the `create`
-method on it and pass the `id` property of the client.
+defined it. You see that you need to call the
+`getReportData` method on it and pass the `id` property of
+the client. This means you'll need to access the selected
+client in the component's `.ts` file. You create a
+`private` field to hold that information.
 
-You add that to the `generate` method and store the
-data you get from the server in a property named
-`data`.
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { ClientDataService } from 'app/client-data/client-data.service';
+import { Client } from 'app/models/client';
+import { ReportDataService } from 'app/report-data/report-data.service';
 
-```javascript
+@Component({
+  selector: 'app-report',
+  templateUrl: './report.component.html',
+  styleUrls: ['./report.component.css']
+})
+export class ReportComponent implements OnInit {
+
+  private clients: Client[];
+
+  // LOOK! A way to get the selected client!
+  private selectedClientId: number;
+
+  constructor(
+    private clientData: ClientDataService,
+    private reportData: ReportDataService
+  ) {}
+
+  ngOnInit() {
+    this.clientData
+      .getAll()
+      .subscribe(clients => this.clients = clients);
+  }
+
+  generate() {
+  }
+
+}
+```
+
+Now, you can make the call to the `ReportDataService`, use
+the selected client, and get report data that you will
+store in a new variable to hold it.
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { ClientDataService } from 'app/client-data/client-data.service';
+import { Client } from 'app/models/client';
+import { ReportDataService } from 'app/report-data/report-data.service';
+import { ReportEntry } from 'app/models/report-entry';
+
+@Component({
+  selector: 'app-report',
+  templateUrl: './report.component.html',
+  styleUrls: ['./report.component.css']
+})
+export class ReportComponent implements OnInit {
+
+  private clients: Client[];
+  private selectedClientId: number;
+  private entries: ReportEntry[];
+
+  constructor(
+    private clientData: ClientDataService,
+    private reportData: ReportDataService
+  ) {}
+
+  ngOnInit() {
+    this.clientData
+      .getAll()
+      .subscribe(clients => this.clients = clients);
+  }
+
   generate() {
     this.reportData
-      .create(this.selectedClient.id)
-      .then(data => this.data = data);
+      .getReportData(this.selectedClientId)
+      .subscribe(data => this.entries = data);
   }
+
+}
 ```
 
 ## Showing the Report Data
 
 You go back to `report.component.html` and dump the
 value of the data onto the page by adding `{{
-report.data }}` at the end of the HTML. You select a
+entries | json }}` at the end of the HTML. You select a
 client, click the "GENERATE REPORT" button, and JSON!
 
 Under the default seed data, *maria*'s report for the
@@ -384,13 +492,12 @@ client Zantina Unlimited returns this data.
 ]
 ```
 
-You delete the `{{ report.data }}` from the page and
-open Michaela's `report/index.html` file, again. In
-that file, you see that lines 58 - 73 contain the HTML
-for the table. You copy and paste that into
-`report.component.html` as the last child of the
-`<div>` that shows stuff only when the user has
-clients.
+You delete the `{{ entries | json }}` from the page and
+open Michaela's `report/index.html` file, again. In that
+file, you see that lines 58 - 73 contain the HTML for the
+table. You copy and paste that into
+`report.component.html` as the last child of the `<div>`
+that shows stuff only when the user has clients.
 
 ```html
 <h1 ng-if="report.clients.length === 0" class="standalone-message">
@@ -461,14 +568,14 @@ show, so you put an `ng-if` on the `<table>` to only
 show if you have data.
 
 ```html
-  <table class="data-table" ng-if="report.data">
+  <table class="data-table" *ngIf="entries">
 ```
 
-In AngularJS, you've already seen that you are supposed
-to use the `ng-repeat` attribute directive when you
+In Angular, you've already seen that you are supposed
+to use the `*ngFor` attribute directive when you
 want things to repeat. You want it to repeat rows of
 the table, specifically, the `<tr>`s inside the
-`<tbody>`. You add the `ng-repeat` and fix the output
+`<tbody>`. You add the `*ngFor` and fix the output
 in the `<td>`s to reference the looping variable.
 
 ```html
@@ -477,45 +584,35 @@ in the `<td>`s to reference the looping variable.
   <!-- Repeat until you're done, little rows of data! -->
   <!-- Each entry in the data will be put into the row
        variable. -->
-  <tr ng-repeat="row in report.data">
+  <tr *ngFor="let entry of entries">
 
     <!-- You reference the row variable, here, to get
          the values onto the page! -->
-    <td class="data-table-main-column">{{ row.monthName }} {{ row.year }}</td>
-    <td class="data-table-numeric">{{ row.numberOfHoursWorked }}</td>
+    <td class="data-table-main-column">{{ entry.monthName }} {{ entry.year }}</td>
+    <td class="data-table-numeric">{{ entry.numberOfHoursWorked }}</td>
   </tr>
 </tbody>
 ```
-
-Now that you have it all finished, you go back to
-Michaela's `report/index.html`, delete the content, and
-replace it with
-
-```handlebars
-{{> common/spa }}
-```
-
-BECAUSE YOU'RE DONE!
 
 ## What Did You Do?
 
 Oh, my, you did so much!
 
 * You used your custom data services by having
-  AngularJS inject them into your component.
-* You used the component lifecycle method `$onInit` to
+  Angular inject them into your component.
+* You used the component lifecycle method `ngOnInit` to
   populate initial information from the client data
   service.
-* You used `ng-if` to show and not show HTML based on
+* You used `*ngIf` to show and not show HTML based on
   the value of properties of the controller.
-* You used `ng-options` and `ng-model` on a `<select>`
+* You used `*ngFor` and `ngModel` on a `<select>`
   to bind the selected value to a property on the
   controller.
 * You used the selected value to call a data service.
-* You used the `ng-repeat` to show data from the data
+* You used the `*ngFor` to show data from the data
   service.
 
-That's an entire AngularJS education on one page! Wow!
+That's an entire Angular education on one page! Wow!
 
 You take a deep breath and decide to take a small
 break. You look over at your goldfish whose eyes seem
